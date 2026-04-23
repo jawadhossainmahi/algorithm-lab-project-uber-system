@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uber DSA System — Layout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080c12;
+            --surface: #0d1520;
+            --card: #111c2d;
+            --border: #1a3050;
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --yellow: #ffd600;
+            --red: #ff4444;
+            --magenta: #d400ff;
+            --text: #c8ddf0;
+            --dim: #4a6880;
+            --mono: 'Share Tech Mono', monospace;
+            --sans: 'Exo 2', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* animated grid bg */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        /* ── HEADER ── */
+        .site-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeDown .6s ease both;
+        }
+
+        .logo {
+            font-family: var(--mono);
+            font-size: clamp(28px, 5vw, 52px);
+            color: var(--cyan);
+            text-shadow: 0 0 30px rgba(0, 229, 255, .5);
+            letter-spacing: 6px;
+        }
+
+        .logo span {
+            color: var(--green);
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--dim);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── TERMINAL WINDOW ── */
+        .terminal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 229, 255, .05), 0 20px 60px rgba(0, 0, 0, .5);
+            margin-bottom: 32px;
+            animation: fadeUp .5s ease both;
+        }
+
+        .term-bar {
+            background: #0a1520;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-r {
+            background: #ff5f56;
+        }
+
+        .dot-y {
+            background: #ffbd2e;
+        }
+
+        .dot-g {
+            background: #27c93f;
+        }
+
+        .term-title {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--dim);
+            margin-left: 8px;
+        }
+
+        .term-body {
+            padding: 20px 24px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* color classes matching terminal */
+        .tc {
+            color: var(--cyan);
+        }
+
+        .tg {
+            color: var(--green);
+        }
+
+        .ty {
+            color: var(--yellow);
+        }
+
+        .tr {
+            color: var(--red);
+        }
+
+        .tm {
+            color: var(--magenta);
+        }
+
+        .tb {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .td {
+            color: var(--dim);
+        }
+
+        .tbox {
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            color: var(--cyan);
+            margin: 2px 0;
+        }
+
+        /* ── MENU GRID ── */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .menu-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all .25s;
+            animation: fadeUp .5s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent, var(--cyan));
+            transform: scaleX(0);
+            transition: transform .3s;
+            transform-origin: left;
+        }
+
+        .menu-card:hover {
+            border-color: var(--accent, var(--cyan));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
+        }
+
+        .menu-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .menu-card:hover .mc-num {
+            color: var(--accent, var(--cyan));
+        }
+
+        .mc-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+            margin-bottom: 8px;
+            transition: color .25s;
+        }
+
+        .mc-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .mc-sub {
+            font-size: 11px;
+            color: var(--dim);
+            font-family: var(--mono);
+        }
+
+        .mc-algo {
+            display: inline-block;
+            margin-top: 8px;
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: rgba(0, 229, 255, .08);
+            color: var(--cyan);
+            border: 1px solid rgba(0, 229, 255, .2);
+        }
+
+        /* ── ALGORITHM SECTION ── */
+        .algo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        @media(max-width:620px) {
+            .algo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .algo-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            animation: fadeUp .5s ease both;
+            border-left: 3px solid var(--accent, var(--cyan));
+        }
+
+        .algo-name {
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--accent, var(--cyan));
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .algo-type {
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .algo-desc {
+            font-size: 12px;
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .algo-complexity {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+        }
+
+        .algo-complexity span {
+            color: var(--yellow);
+        }
+
+        /* ── CITY MAP ── */
+        .map-section {
+            margin-bottom: 32px;
+        }
+
+        .city-map {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            position: relative;
+            height: 340px;
+            overflow: hidden;
+        }
+
+        .map-node {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 2px solid var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--cyan);
+            cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 0 12px rgba(0, 229, 255, .2);
+            z-index: 2;
+        }
+
+        .map-node:hover {
+            background: rgba(0, 229, 255, .15);
+            box-shadow: 0 0 24px rgba(0, 229, 255, .5);
+            transform: scale(1.15);
+        }
+
+        .map-node .node-label {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: var(--dim);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        svg.map-lines {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.map-lines line {
+            stroke: rgba(0, 229, 255, .2);
+            stroke-width: 1.5;
+            stroke-dasharray: 4 4;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        /* ── DATA FILE SECTION ── */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .file-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            animation: fadeUp .5s ease both;
+        }
+
+        .file-icon {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+
+        .file-desc {
+            font-size: 11px;
+            color: var(--dim);
+        }
+
+        .file-format {
+            margin-top: 8px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: rgba(0, 255, 136, .5);
+            background: rgba(0, 255, 136, .05);
+            border: 1px solid rgba(0, 255, 136, .1);
+            border-radius: 3px;
+            padding: 2px 6px;
+            display: inline-block;
+        }
+
+        /* ── FLOW DIAGRAM ── */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .flow-step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            text-align: center;
+            min-width: 130px;
+            animation: fadeUp .5s ease both;
+        }
+
+        .flow-step-num {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 4px;
+        }
+
+        .flow-step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--cyan);
+        }
+
+        .flow-step-algo {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--green);
+            margin-top: 4px;
+        }
+
+        .flow-arrow {
+            font-family: var(--mono);
+            color: var(--dim);
+            padding: 0 6px;
+            font-size: 18px;
+        }
+
+        /* animations */
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* stagger */
+        .menu-card:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .menu-card:nth-child(2) {
+            animation-delay: .10s
+        }
+
+        .menu-card:nth-child(3) {
+            animation-delay: .15s
+        }
+
+        .menu-card:nth-child(4) {
+            animation-delay: .20s
+        }
+
+        .menu-card:nth-child(5) {
+            animation-delay: .25s
+        }
+
+        .menu-card:nth-child(6) {
+            animation-delay: .30s
+        }
+
+        .menu-card:nth-child(7) {
+            animation-delay: .35s
+        }
+
+        .algo-card:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .algo-card:nth-child(2) {
+            animation-delay: .10s
+        }
+
+        .algo-card:nth-child(3) {
+            animation-delay: .15s
+        }
+
+        .algo-card:nth-child(4) {
+            animation-delay: .20s
+        }
+
+        .algo-card:nth-child(5) {
+            animation-delay: .25s
+        }
+
+        .algo-card:nth-child(6) {
+            animation-delay: .30s
+        }
+
+        /* tooltip */
+        .tooltip-box {
+            display: none;
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0a1520;
+            border: 1px solid var(--cyan);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text);
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .map-node:hover .tooltip-box {
+            display: block;
+        }
+
+        .map-node {
+            position: absolute;
+            overflow: visible;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 8px 0 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+
+        <!-- HEADER -->
+        <div class="site-header">
+            <div class="logo">UBER<span>DSA</span></div>
+            <div class="tagline">C++ Terminal System — Layout & Architecture</div>
+        </div>
+
+        <!-- TERMINAL PREVIEW -->
+        <div class="section-label">Terminal Preview</div>
+        <div class="terminal">
+            <div class="term-bar">
+                <div class="dot dot-r"></div>
+                <div class="dot dot-y"></div>
+                <div class="dot dot-g"></div>
+                <div class="term-title">uber — bash — 80×24</div>
+            </div>
+            <div class="term-body">
+                <div class="tc">╔══════════════════════════════════════════════════════════╗</div>
+                <div class="tc">║ <span class="tb">██╗ ██╗██████╗ ███████╗██████╗</span> ║</div>
+                <div class="tc">║ <span class="tb">██║ ██║██╔══██╗██╔════╝██╔══██╗</span> ║</div>
+                <div class="tc">║ <span class="tb">╚██████╔╝██████╔╝███████╗██║ ██║ SYSTEM</span> ║</div>
+                <div class="tc">║ DSA-Powered Ride Management Platform ║</div>
+                <div class="tc">╚══════════════════════════════════════════════════════════╝</div>
+                <br>
+                <div><span class="tc tb">[1]</span> Book a Ride &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="td">(Dijkstra
+                        — nearest driver)</span></div>
+                <div><span class="tc tb">[2]</span> Customer Management</div>
+                <div><span class="tc tb">[3]</span> Driver Management</div>
+                <div><span class="tc tb">[4]</span> City Map &amp; Roads</div>
+                <div><span class="tc tb">[5]</span> Ride History</div>
+                <div><span class="tc tb">[6]</span> Algorithm Analysis &nbsp;<span class="td">(DSA Showcase)</span>
+                </div>
+                <div><span class="tc tb">[7]</span> System Statistics</div>
+                <div><span class="tc tb">[0]</span> Exit</div>
+                <br>
+                <div><span class="tm">»</span> <span class="tb">Choose an option:</span> <span class="tg">_</span></div>
+            </div>
+        </div>
+
+        <!-- MAIN MENU CARDS -->
+        <div class="section-label">Main Menu — 7 Modules</div>
+        <div class="menu-grid">
+            <div class="menu-card" style="--accent:var(--green)">
+                <div class="mc-num">[1]</div>
+                <div class="mc-title">Book a Ride</div>
+                <div class="mc-sub">Core feature — customer books trip</div>
+                <div class="mc-algo">DIJKSTRA</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--cyan)">
+                <div class="mc-num">[2]</div>
+                <div class="mc-title">Customer Management</div>
+                <div class="mc-sub">Register · View · List</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--cyan)">
+                <div class="mc-num">[3]</div>
+                <div class="mc-title">Driver Management</div>
+                <div class="mc-sub">Register · Toggle · Update location</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--yellow)">
+                <div class="mc-num">[4]</div>
+                <div class="mc-title">City Map &amp; Roads</div>
+                <div class="mc-sub">View locations · Add new roads</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--cyan)">
+                <div class="mc-num">[5]</div>
+                <div class="mc-title">Ride History</div>
+                <div class="mc-sub">All rides · Fare · Route · Status</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--magenta)">
+                <div class="mc-num">[6]</div>
+                <div class="mc-title">Algorithm Analysis</div>
+                <div class="mc-sub">DSA showcase — all 6 algorithms</div>
+                <div class="mc-algo">6 ALGORITHMS</div>
+            </div>
+            <div class="menu-card" style="--accent:var(--green)">
+                <div class="mc-num">[7]</div>
+                <div class="mc-title">System Statistics</div>
+                <div class="mc-sub">Revenue · Drivers · Top stats</div>
+            </div>
+        </div>
+
+        <!-- BOOK A RIDE FLOW -->
+        <div class="section-label">Book a Ride — Step by Step Flow</div>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 1</div>
+                <div class="flow-step-label">Customer<br>enters ID</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 2</div>
+                <div class="flow-step-label">Pick<br>Drop-off</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 3</div>
+                <div class="flow-step-label">Find Nearest<br>Driver</div>
+                <div class="flow-step-algo">DIJKSTRA</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 4</div>
+                <div class="flow-step-label">Shortest<br>Route</div>
+                <div class="flow-step-algo">DIJKSTRA</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 5</div>
+                <div class="flow-step-label">Fare<br>Calculated</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 6</div>
+                <div class="flow-step-label">Confirm<br>+ Rate</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="border-color:var(--green)">
+                <div class="flow-step-num">DONE</div>
+                <div class="flow-step-label" style="color:var(--green)">Saved to<br>rides.txt</div>
+            </div>
+        </div>
+
+        <!-- CITY MAP -->
+        <div class="section-label">City Map — 10 Locations (hover nodes)</div>
+        <div class="map-section">
+            <div class="city-map" id="cityMap">
+                <svg class="map-lines" id="mapSvg"></svg>
+                <!-- nodes positioned by x,y scaled to fit -->
+            </div>
+        </div>
+
+        <!-- ALGORITHMS -->
+        <div class="section-label">6 Algorithms — Details</div>
+        <div class="algo-grid">
+            <div class="algo-card" style="--accent:var(--green)">
+                <div class="algo-name">Dijkstra</div>
+                <div class="algo-type">Graph · Greedy · Shortest Path</div>
+                <div class="algo-desc">Finds the nearest available driver from customer's location. Also computes the
+                    optimal route from pickup to drop-off across the city road graph.</div>
+                <div class="algo-complexity">Time: <span>O((V+E) log V)</span> &nbsp; Space: <span>O(V)</span></div>
+            </div>
+            <div class="algo-card" style="--accent:var(--yellow)">
+                <div class="algo-name">Bellman-Ford</div>
+                <div class="algo-type">Graph · DP · Negative Weights</div>
+                <div class="algo-desc">Handles traffic penalties (negative-weight edges). Detects negative cycles in the
+                    road network. Used for traffic-aware routing in the algorithm menu.</div>
+                <div class="algo-complexity">Time: <span>O(V × E)</span> &nbsp; Space: <span>O(V)</span></div>
+            </div>
+            <div class="algo-card" style="--accent:var(--cyan)">
+                <div class="algo-name">Prim's MST</div>
+                <div class="algo-type">Graph · Greedy · Spanning Tree</div>
+                <div class="algo-desc">Builds the minimum spanning tree of all city zones using a priority queue. Shows
+                    the minimum road infrastructure needed to connect every location.</div>
+                <div class="algo-complexity">Time: <span>O((V+E) log V)</span> &nbsp; Space: <span>O(V)</span></div>
+            </div>
+            <div class="algo-card" style="--accent:var(--magenta)">
+                <div class="algo-name">Kruskal's MST</div>
+                <div class="algo-type">Graph · Union-Find · Spanning Tree</div>
+                <div class="algo-desc">Sorts all roads by distance and uses Union-Find (DSU) to build the MST. Compared
+                    side-by-side with Prim's — both give equal total cost.</div>
+                <div class="algo-complexity">Time: <span>O(E log E)</span> &nbsp; Space: <span>O(V)</span></div>
+            </div>
+            <div class="algo-card" style="--accent:var(--green)">
+                <div class="algo-name">LCS</div>
+                <div class="algo-type">DP · Subsequence · Route Analysis</div>
+                <div class="algo-desc">Finds the Longest Common Subsequence between two customers' location visit
+                    histories. Identifies shared travel zones — useful for carpooling suggestions.</div>
+                <div class="algo-complexity">Time: <span>O(m × n)</span> &nbsp; Space: <span>O(m × n)</span></div>
+            </div>
+            <div class="algo-card" style="--accent:var(--yellow)">
+                <div class="algo-name">LIS</div>
+                <div class="algo-type">DP · Subsequence · Trend Analysis</div>
+                <div class="algo-desc">Finds the Longest Increasing Subsequence of a driver's ride durations over time.
+                    Identifies whether a driver is getting faster or slower across their trips.</div>
+                <div class="algo-complexity">Time: <span>O(n log n)</span> &nbsp; Space: <span>O(n)</span></div>
+            </div>
+        </div>
+
+        <!-- DATA FILES -->
+        <div class="section-label">Data Storage — TXT Files</div>
+        <div class="files-grid">
+            <div class="file-card">
+                <div class="file-icon">📍</div>
+                <div class="file-name">locations.txt</div>
+                <div class="file-desc">City zones with coordinates</div>
+                <div class="file-format">id|name|x|y</div>
+            </div>
+            <div class="file-card">
+                <div class="file-icon">🛣️</div>
+                <div class="file-name">roads.txt</div>
+                <div class="file-desc">Road edges and distances</div>
+                <div class="file-format">from|to|weight</div>
+            </div>
+            <div class="file-card">
+                <div class="file-icon">👤</div>
+                <div class="file-name">customers.txt</div>
+                <div class="file-desc">Customer profiles & history</div>
+                <div class="file-format">id|name|phone|...</div>
+            </div>
+            <div class="file-card">
+                <div class="file-icon">🚗</div>
+                <div class="file-name">drivers.txt</div>
+                <div class="file-desc">Driver profiles & earnings</div>
+                <div class="file-format">id|name|car|...</div>
+            </div>
+            <div class="file-card">
+                <div class="file-icon">🧾</div>
+                <div class="file-name">rides.txt</div>
+                <div class="file-desc">All completed rides</div>
+                <div class="file-format">id|cust|driver|...</div>
+            </div>
+        </div>
+
+        <!-- FILE STRUCTURE -->
+        <div class="section-label">Source File Architecture</div>
+        <div class="terminal">
+            <div class="term-bar">
+                <div class="dot dot-r"></div>
+                <div class="dot dot-y"></div>
+                <div class="dot dot-g"></div>
+                <div class="term-title">uber_system/ — project structure</div>
+            </div>
+            <div class="term-body">
+                <div class="tg">uber_system/</div>
+                <div>├── <span class="tc">uber.h</span> <span class="td">← Data structs + all 6 algorithms (Graph, LCS,
+                        LIS)</span></div>
+                <div>├── <span class="tc">filemanager.h</span> <span class="td">← Read/Write all .txt data files</span>
+                </div>
+                <div>├── <span class="tc">ui.h</span> <span class="td">← Terminal colors, prompts, tables, banner</span>
+                </div>
+                <div>├── <span class="tc">ubersystem.h</span> <span class="td">← Core business logic, calls
+                        algorithms</span></div>
+                <div>├── <span class="tc">main.cpp</span> <span class="td">← Entry point, all menu navigation</span>
+                </div>
+                <div>│</div>
+                <div>├── <span class="tg">locations.txt</span> <span class="td">← auto-created on first run</span></div>
+                <div>├── <span class="tg">roads.txt</span></div>
+                <div>├── <span class="tg">customers.txt</span></div>
+                <div>├── <span class="tg">drivers.txt</span></div>
+                <div>└── <span class="tg">rides.txt</span></div>
+                <br>
+                <div><span class="ty">$</span> g++ -std=c++17 -O2 -o uber main.cpp</div>
+                <div><span class="ty">$</span> ./uber</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── Draw city map ──────────────────────────────────────
+        const locations = [
+            { id: 0, name: "Airport", x: 0, y: 0 },
+            { id: 1, name: "City Center", x: 3, y: 4 },
+            { id: 2, name: "North Park", x: 1, y: 8 },
+            { id: 3, name: "East Market", x: 7, y: 3 },
+            { id: 4, name: "West Town", x: -4, y: 5 },
+            { id: 5, name: "South Bay", x: 2, y: -5 },
+            { id: 6, name: "Tech Hub", x: 9, y: 9 },
+            { id: 7, name: "University", x: -2, y: 9 },
+            { id: 8, name: "Hospital", x: 5, y: 1 },
+            { id: 9, name: "Shopping Mall", x: 6, y: 7 },
+        ];
+
+        const roads = [
+            [0, 1], [0, 5], [0, 8],
+            [1, 2], [1, 3], [1, 4], [1, 8], [1, 9],
+            [2, 4], [2, 7],
+            [3, 6], [3, 8], [3, 9],
+            [4, 7], [5, 8],
+            [6, 9], [7, 2], [9, 6]
+        ];
+
+        const mapEl = document.getElementById('cityMap');
+        const svgEl = document.getElementById('mapSvg');
+        const W = mapEl.offsetWidth || 800;
+        const H = mapEl.offsetHeight || 340;
+        const PAD = 50;
+
+        // Scale x,y to fit canvas
+        const xs = locations.map(l => l.x), ys = locations.map(l => l.y);
+        const minX = Math.min(...xs), maxX = Math.max(...xs);
+        const minY = Math.min(...ys), maxY = Math.max(...ys);
+
+        function scaleX(x) { return PAD + (x - minX) / (maxX - minX) * (W - PAD * 2); }
+        function scaleY(y) { return H - PAD - (y - minY) / (maxY - minY) * (H - PAD * 2); }
+
+        // Draw SVG lines
+        roads.forEach(([a, b]) => {
+            const la = locations[a], lb = locations[b];
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', scaleX(la.x));
+            line.setAttribute('y1', scaleY(la.y));
+            line.setAttribute('x2', scaleX(lb.x));
+            line.setAttribute('y2', scaleY(lb.y));
+            svgEl.appendChild(line);
+        });
+
+        // Draw nodes
+        locations.forEach(loc => {
+            const px = scaleX(loc.x), py = scaleY(loc.y);
+            const node = document.createElement('div');
+            node.className = 'map-node';
+            node.style.left = (px - 22) + 'px';
+            node.style.top = (py - 22) + 'px';
+            node.innerHTML = `${loc.id}<div class="node-label">${loc.name}</div>
+    <div class="tooltip-box">ID:${loc.id} | ${loc.name}<br>x:${loc.x} y:${loc.y}</div>`;
+            mapEl.appendChild(node);
+        });
+    </script>
+</body>
+
+</html>
