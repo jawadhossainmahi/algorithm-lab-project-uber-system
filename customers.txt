@@ -1,3 +1,0 @@
-1|Ahmed Khan|017111111|khan@khan.com|0|90.5|1,2,3,4
-2|Fatima Megum|0172222222|megum@megum.com|6|26|5
-3|Nabil Hasan|019232323232|nabil@nabil.com|0|0|

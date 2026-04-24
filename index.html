@@ -4,30 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uber DSA System — Layout</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap"
+    <title>UberDSA — City Map Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --bg: #080c12;
-            --surface: #0d1520;
-            --card: #111c2d;
-            --border: #1a3050;
+            --bg: #060a0f;
+            --surface: #0b1118;
+            --card: #0e1820;
+            --border: #152232;
+            --border2: #1e3448;
             --cyan: #00e5ff;
+            --cyan-dim: rgba(0, 229, 255, .12);
             --green: #00ff88;
             --yellow: #ffd600;
-            --red: #ff4444;
-            --magenta: #d400ff;
-            --text: #c8ddf0;
-            --dim: #4a6880;
+            --red: #ff4455;
+            --magenta: #cc44ff;
+            --text: #b8cfe8;
+            --dim: #3d5a74;
             --mono: 'Share Tech Mono', monospace;
-            --sans: 'Exo 2', sans-serif;
+            --sans: 'Rajdhani', sans-serif;
         }
 
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box
         }
 
         body {
@@ -38,892 +40,1361 @@
             overflow-x: hidden;
         }
 
-        /* animated grid bg */
+        /* scanline texture */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .08) 2px, rgba(0, 0, 0, .08) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* grid overlay */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
+                linear-gradient(rgba(0, 229, 255, .025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, .025) 1px, transparent 1px);
+            background-size: 48px 48px;
             pointer-events: none;
             z-index: 0;
         }
 
-        .wrap {
+        .app {
             position: relative;
             z-index: 1;
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 32px 20px;
+            padding: 24px 20px 60px;
         }
 
         /* ── HEADER ── */
-        .site-header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeDown .6s ease both;
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .logo {
             font-family: var(--mono);
-            font-size: clamp(28px, 5vw, 52px);
+            font-size: clamp(20px, 3vw, 30px);
             color: var(--cyan);
-            text-shadow: 0 0 30px rgba(0, 229, 255, .5);
-            letter-spacing: 6px;
+            text-shadow: 0 0 24px rgba(0, 229, 255, .5);
+            letter-spacing: 4px;
+        }
+
+        .logo em {
+            color: var(--green);
+            font-style: normal;
         }
 
         .logo span {
-            color: var(--green);
-        }
-
-        .tagline {
-            font-size: 13px;
-            color: var(--dim);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-top: 6px;
-        }
-
-        /* ── SECTION LABEL ── */
-        .section-label {
-            font-family: var(--mono);
             font-size: 11px;
-            color: var(--cyan);
+            color: var(--dim);
+            display: block;
             letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 14px;
+            margin-top: 2px;
+        }
+
+        .load-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 9px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid var(--border2);
+            background: var(--card);
+            color: var(--cyan);
+            transition: all .2s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            letter-spacing: 1px;
         }
 
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
+        .btn:hover {
+            border-color: var(--cyan);
+            background: var(--cyan-dim);
+            box-shadow: 0 0 16px rgba(0, 229, 255, .2);
         }
 
-        /* ── TERMINAL WINDOW ── */
-        .terminal {
+        .btn.green {
+            color: var(--green);
+            border-color: rgba(0, 255, 136, .25);
+        }
+
+        .btn.green:hover {
+            border-color: var(--green);
+            background: rgba(0, 255, 136, .08);
+        }
+
+        .btn.yellow {
+            color: var(--yellow);
+            border-color: rgba(255, 214, 0, .25);
+        }
+
+        .btn.yellow:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 214, 0, .08);
+        }
+
+        .btn.red {
+            color: var(--red);
+            border-color: rgba(255, 68, 85, .25);
+        }
+
+        .btn.red:hover {
+            border-color: var(--red);
+            background: rgba(255, 68, 85, .08);
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        /* ── STATUS BAR ── */
+        .status-bar {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 8px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--dim);
+            margin-bottom: 18px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .status-bar .s-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .status-bar .s-val {
+            color: var(--cyan);
+        }
+
+        .status-bar .s-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--dim);
+        }
+
+        .status-bar .s-dot.ok {
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+        }
+
+        /* ── LAYOUT ── */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 16px;
+        }
+
+        @media(max-width:860px) {
+            .layout {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ── MAP PANEL ── */
+        .map-panel {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(0, 229, 255, .05), 0 20px 60px rgba(0, 0, 0, .5);
-            margin-bottom: 32px;
-            animation: fadeUp .5s ease both;
+            position: relative;
         }
 
-        .term-bar {
-            background: #0a1520;
-            padding: 10px 16px;
+        .panel-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            background: #080e16;
+        }
+
+        .panel-title .pt-right {
+            display: flex;
             gap: 8px;
-            border-bottom: 1px solid var(--border);
         }
 
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .dot-r {
-            background: #ff5f56;
-        }
-
-        .dot-y {
-            background: #ffbd2e;
-        }
-
-        .dot-g {
-            background: #27c93f;
-        }
-
-        .term-title {
-            font-family: var(--mono);
-            font-size: 12px;
-            color: var(--dim);
-            margin-left: 8px;
-        }
-
-        .term-body {
-            padding: 20px 24px;
-            font-family: var(--mono);
-            font-size: 13px;
-            line-height: 1.8;
-        }
-
-        /* color classes matching terminal */
-        .tc {
-            color: var(--cyan);
-        }
-
-        .tg {
-            color: var(--green);
-        }
-
-        .ty {
-            color: var(--yellow);
-        }
-
-        .tr {
-            color: var(--red);
-        }
-
-        .tm {
-            color: var(--magenta);
-        }
-
-        .tb {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        .td {
-            color: var(--dim);
-        }
-
-        .tbox {
-            border: 1px solid var(--border);
-            padding: 3px 10px;
-            border-radius: 4px;
-            display: inline-block;
-            color: var(--cyan);
-            margin: 2px 0;
-        }
-
-        /* ── MENU GRID ── */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
-            margin-bottom: 32px;
-        }
-
-        .menu-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 18px;
-            cursor: pointer;
-            transition: all .25s;
-            animation: fadeUp .5s ease both;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--accent, var(--cyan));
-            transform: scaleX(0);
-            transition: transform .3s;
-            transform-origin: left;
-        }
-
-        .menu-card:hover {
-            border-color: var(--accent, var(--cyan));
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
-        }
-
-        .menu-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .menu-card:hover .mc-num {
-            color: var(--accent, var(--cyan));
-        }
-
-        .mc-num {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--dim);
-            margin-bottom: 8px;
-            transition: color .25s;
-        }
-
-        .mc-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .mc-sub {
-            font-size: 11px;
-            color: var(--dim);
-            font-family: var(--mono);
-        }
-
-        .mc-algo {
-            display: inline-block;
-            margin-top: 8px;
+        .badge {
             font-family: var(--mono);
             font-size: 10px;
             padding: 2px 8px;
             border-radius: 3px;
-            background: rgba(0, 229, 255, .08);
+            border: 1px solid;
+        }
+
+        .badge.cyan {
             color: var(--cyan);
-            border: 1px solid rgba(0, 229, 255, .2);
+            border-color: rgba(0, 229, 255, .3);
+            background: rgba(0, 229, 255, .06);
         }
 
-        /* ── ALGORITHM SECTION ── */
-        .algo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 32px;
+        .badge.green {
+            color: var(--green);
+            border-color: rgba(0, 255, 136, .3);
+            background: rgba(0, 255, 136, .06);
         }
 
-        @media(max-width:620px) {
-            .algo-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .algo-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 18px 20px;
-            animation: fadeUp .5s ease both;
-            border-left: 3px solid var(--accent, var(--cyan));
-        }
-
-        .algo-name {
-            font-family: var(--mono);
-            font-size: 14px;
-            color: var(--accent, var(--cyan));
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .algo-type {
-            font-size: 10px;
-            color: var(--dim);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-
-        .algo-desc {
-            font-size: 12px;
-            color: var(--text);
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-
-        .algo-complexity {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--dim);
-        }
-
-        .algo-complexity span {
+        .badge.yellow {
             color: var(--yellow);
+            border-color: rgba(255, 214, 0, .3);
+            background: rgba(255, 214, 0, .06);
         }
 
-        /* ── CITY MAP ── */
-        .map-section {
-            margin-bottom: 32px;
+        .badge.red {
+            color: var(--red);
+            border-color: rgba(255, 68, 85, .3);
+            background: rgba(255, 68, 85, .06);
         }
 
-        .city-map {
+        #mapCanvas {
+            width: 100%;
+            display: block;
+            cursor: crosshair;
+            min-height: 460px;
+            background: radial-gradient(ellipse at 40% 40%, #0a1824 0%, #060a0f 70%);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .info-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 24px;
-            position: relative;
-            height: 340px;
             overflow: hidden;
         }
 
-        .map-node {
-            position: absolute;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card);
-            border: 2px solid var(--cyan);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .info-body {
+            padding: 14px 16px;
+        }
+
+        /* node detail */
+        .nd-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 4px;
+        }
+
+        .nd-id {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--cyan);
-            cursor: pointer;
-            transition: all .2s;
-            box-shadow: 0 0 12px rgba(0, 229, 255, .2);
-            z-index: 2;
-        }
-
-        .map-node:hover {
-            background: rgba(0, 229, 255, .15);
-            box-shadow: 0 0 24px rgba(0, 229, 255, .5);
-            transform: scale(1.15);
-        }
-
-        .map-node .node-label {
-            position: absolute;
-            bottom: -22px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9px;
             color: var(--dim);
-            white-space: nowrap;
-            pointer-events: none;
+            margin-bottom: 10px;
         }
 
-        svg.map-lines {
+        .nd-coord {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--green);
+            margin-bottom: 12px;
+        }
+
+        .nd-connections {
+            font-size: 12px;
+            color: var(--dim);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: var(--mono);
+        }
+
+        .conn-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .conn-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .conn-dest {
+            color: var(--text);
+        }
+
+        .conn-meta {
+            font-family: var(--mono);
+            font-size: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .conn-dist {
+            color: var(--cyan);
+        }
+
+        .conn-wt {
+            color: var(--yellow);
+        }
+
+        .conn-wt.neg {
+            color: var(--green);
+        }
+
+        .placeholder {
+            text-align: center;
+            padding: 30px 16px;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--dim);
+            line-height: 1.8;
+        }
+
+        .placeholder .ph-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        /* legend */
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .leg-line {
+            width: 30px;
+            height: 2px;
+            border-radius: 1px;
+            flex-shrink: 0;
+        }
+
+        .leg-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid;
+            flex-shrink: 0;
+        }
+
+        /* roads table */
+        .rt-wrap {
+            overflow-y: auto;
+            max-height: 220px;
+        }
+
+        .roads-table {
+            width: 100%;
+            font-family: var(--mono);
+            font-size: 11px;
+            border-collapse: collapse;
+        }
+
+        .roads-table th {
+            padding: 6px 10px;
+            text-align: left;
+            color: var(--dim);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            letter-spacing: 1px;
+            font-size: 10px;
+        }
+
+        .roads-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .roads-table tr:hover td {
+            background: var(--card);
+        }
+
+        .roads-table .r-from {
+            color: var(--text);
+        }
+
+        .roads-table .r-to {
+            color: var(--text);
+        }
+
+        .roads-table .r-dist {
+            color: var(--cyan);
+        }
+
+        .roads-table .r-wt {
+            color: var(--yellow);
+        }
+
+        .roads-table .r-wt.neg {
+            color: var(--green);
+        }
+
+        .roads-table .r-neg-badge {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 2px;
+            background: rgba(0, 255, 136, .1);
+            color: var(--green);
+            border: 1px solid rgba(0, 255, 136, .2);
+            margin-left: 4px;
+        }
+
+        /* algo panel */
+        .algo-panel {
+            padding: 14px 16px;
+        }
+
+        .algo-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .algo-src-label,
+        .algo-dst-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        select.algo-select {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-family: var(--mono);
+            font-size: 12px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+        }
+
+        select.algo-select:focus {
+            border-color: var(--cyan);
+        }
+
+        .algo-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .algo-result {
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.8;
+            padding: 10px 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-height: 60px;
+            color: var(--dim);
+        }
+
+        .algo-result .ar-path {
+            color: var(--cyan);
+        }
+
+        .algo-result .ar-dist {
+            color: var(--green);
+        }
+
+        .algo-result .ar-wt {
+            color: var(--yellow);
+        }
+
+        .algo-result .ar-algo {
+            color: var(--magenta);
+            font-size: 10px;
+        }
+
+        .algo-result .ar-err {
+            color: var(--red);
+        }
+
+        /* empty state overlay */
+        .empty-overlay {
             position: absolute;
             inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, #0a1824 0%, #060a0f 80%);
+            pointer-events: none;
+            transition: opacity .4s;
+        }
+
+        .empty-overlay.hidden {
+            opacity: 0;
             pointer-events: none;
         }
 
-        svg.map-lines line {
-            stroke: rgba(0, 229, 255, .2);
-            stroke-width: 1.5;
-            stroke-dasharray: 4 4;
+        .eo-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: .4;
         }
 
-        .map-legend {
-            position: absolute;
-            bottom: 12px;
-            right: 16px;
+        .eo-title {
             font-family: var(--mono);
-            font-size: 10px;
-            color: var(--dim);
-        }
-
-        /* ── DATA FILE SECTION ── */
-        .files-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-
-        .file-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            animation: fadeUp .5s ease both;
-        }
-
-        .file-icon {
-            font-size: 22px;
+            font-size: 16px;
+            color: var(--cyan);
             margin-bottom: 8px;
+            opacity: .6;
+            letter-spacing: 2px;
         }
 
-        .file-name {
+        .eo-sub {
             font-family: var(--mono);
-            font-size: 12px;
-            color: var(--green);
-            margin-bottom: 4px;
-        }
-
-        .file-desc {
             font-size: 11px;
             color: var(--dim);
-        }
-
-        .file-format {
-            margin-top: 8px;
-            font-family: var(--mono);
-            font-size: 10px;
-            color: rgba(0, 255, 136, .5);
-            background: rgba(0, 255, 136, .05);
-            border: 1px solid rgba(0, 255, 136, .1);
-            border-radius: 3px;
-            padding: 2px 6px;
-            display: inline-block;
-        }
-
-        /* ── FLOW DIAGRAM ── */
-        .flow {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .flow-step {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px 18px;
             text-align: center;
-            min-width: 130px;
-            animation: fadeUp .5s ease both;
-        }
-
-        .flow-step-num {
-            font-family: var(--mono);
-            font-size: 10px;
-            color: var(--dim);
-            margin-bottom: 4px;
-        }
-
-        .flow-step-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--cyan);
-        }
-
-        .flow-step-algo {
-            font-family: var(--mono);
-            font-size: 10px;
-            color: var(--green);
-            margin-top: 4px;
-        }
-
-        .flow-arrow {
-            font-family: var(--mono);
-            color: var(--dim);
-            padding: 0 6px;
-            font-size: 18px;
-        }
-
-        /* animations */
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        /* stagger */
-        .menu-card:nth-child(1) {
-            animation-delay: .05s
-        }
-
-        .menu-card:nth-child(2) {
-            animation-delay: .10s
-        }
-
-        .menu-card:nth-child(3) {
-            animation-delay: .15s
-        }
-
-        .menu-card:nth-child(4) {
-            animation-delay: .20s
-        }
-
-        .menu-card:nth-child(5) {
-            animation-delay: .25s
-        }
-
-        .menu-card:nth-child(6) {
-            animation-delay: .30s
-        }
-
-        .menu-card:nth-child(7) {
-            animation-delay: .35s
-        }
-
-        .algo-card:nth-child(1) {
-            animation-delay: .05s
-        }
-
-        .algo-card:nth-child(2) {
-            animation-delay: .10s
-        }
-
-        .algo-card:nth-child(3) {
-            animation-delay: .15s
-        }
-
-        .algo-card:nth-child(4) {
-            animation-delay: .20s
-        }
-
-        .algo-card:nth-child(5) {
-            animation-delay: .25s
-        }
-
-        .algo-card:nth-child(6) {
-            animation-delay: .30s
+            line-height: 1.8;
+            max-width: 280px;
         }
 
         /* tooltip */
-        .tooltip-box {
-            display: none;
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #0a1520;
+        #tooltip {
+            position: fixed;
+            pointer-events: none;
+            background: #08111c;
             border: 1px solid var(--cyan);
             border-radius: 6px;
             padding: 8px 12px;
             font-family: var(--mono);
             font-size: 11px;
             color: var(--text);
-            white-space: nowrap;
-            z-index: 10;
-            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 200px;
+            line-height: 1.7;
+            box-shadow: 0 0 20px rgba(0, 229, 255, .2);
         }
 
-        .map-node:hover .tooltip-box {
-            display: block;
+        /* notice */
+        .notice {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 8px 14px;
+            background: rgba(0, 229, 255, .05);
+            border: 1px solid rgba(0, 229, 255, .15);
+            border-radius: 6px;
+            color: var(--dim);
+            margin-bottom: 16px;
+            line-height: 1.8;
         }
 
-        .map-node {
-            position: absolute;
-            overflow: visible;
+        .notice strong {
+            color: var(--cyan);
         }
 
-        hr.divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 8px 0 24px;
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: .6
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
 
 <body>
-    <div class="wrap">
+    <div class="app">
 
         <!-- HEADER -->
-        <div class="site-header">
-            <div class="logo">UBER<span>DSA</span></div>
-            <div class="tagline">C++ Terminal System — Layout & Architecture</div>
+        <header>
+            <div class="logo">
+                UBER<em>DSA</em>
+                <span>CITY MAP VISUALIZER — live from .txt files</span>
+            </div>
+            <div class="load-btns">
+                <button class="btn green" onclick="loadLocations()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Load locations.txt
+                </button>
+                <button class="btn yellow" onclick="loadRoads()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Load roads.txt
+                </button>
+                <button class="btn" onclick="refreshAll()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10" />
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- NOTICE -->
+        <div class="notice">
+            <strong>How to use:</strong> Click <strong>Load locations.txt</strong> then <strong>Load roads.txt</strong>
+            — both files must be in the same folder as your C++ project.
+            After editing the .txt files via the terminal program, click <strong>Refresh</strong> to re-read them and
+            update the map instantly.
+            Roads with <strong style="color:var(--green)">negative weight</strong> are shown in green (express lanes).
         </div>
 
-        <!-- TERMINAL PREVIEW -->
-        <div class="section-label">Terminal Preview</div>
-        <div class="terminal">
-            <div class="term-bar">
-                <div class="dot dot-r"></div>
-                <div class="dot dot-y"></div>
-                <div class="dot dot-g"></div>
-                <div class="term-title">uber — bash — 80×24</div>
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="s-item">
+                <div class="s-dot" id="locDot"></div><span>locations.txt</span><span class="s-val" id="locStatus">not
+                    loaded</span>
             </div>
-            <div class="term-body">
-                <div class="tc">╔══════════════════════════════════════════════════════════╗</div>
-                <div class="tc">║ <span class="tb">██╗ ██╗██████╗ ███████╗██████╗</span> ║</div>
-                <div class="tc">║ <span class="tb">██║ ██║██╔══██╗██╔════╝██╔══██╗</span> ║</div>
-                <div class="tc">║ <span class="tb">╚██████╔╝██████╔╝███████╗██║ ██║ SYSTEM</span> ║</div>
-                <div class="tc">║ DSA-Powered Ride Management Platform ║</div>
-                <div class="tc">╚══════════════════════════════════════════════════════════╝</div>
-                <br>
-                <div><span class="tc tb">[1]</span> Book a Ride &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="td">(Dijkstra
-                        — nearest driver)</span></div>
-                <div><span class="tc tb">[2]</span> Customer Management</div>
-                <div><span class="tc tb">[3]</span> Driver Management</div>
-                <div><span class="tc tb">[4]</span> City Map &amp; Roads</div>
-                <div><span class="tc tb">[5]</span> Ride History</div>
-                <div><span class="tc tb">[6]</span> Algorithm Analysis &nbsp;<span class="td">(DSA Showcase)</span>
+            <div class="s-item">
+                <div class="s-dot" id="roadDot"></div><span>roads.txt</span><span class="s-val" id="roadStatus">not
+                    loaded</span>
+            </div>
+            <div class="s-item"><span>Nodes:</span><span class="s-val" id="nodeCount">—</span></div>
+            <div class="s-item"><span>Edges:</span><span class="s-val" id="edgeCount">—</span></div>
+            <div class="s-item"><span>Negative edges:</span><span class="s-val" id="negCount"
+                    style="color:var(--green)">—</span></div>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <div class="layout">
+
+            <!-- LEFT: MAP + TABS -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+
+                <!-- Map canvas -->
+                <div class="map-panel">
+                    <div class="panel-title">
+                        CITY GRAPH
+                        <div class="pt-right">
+                            <span class="badge cyan" id="badgeNodes">0 nodes</span>
+                            <span class="badge yellow" id="badgeEdges">0 edges</span>
+                            <span class="badge green" id="badgeNeg">0 express</span>
+                        </div>
+                    </div>
+                    <div style="position:relative">
+                        <canvas id="mapCanvas" width="760" height="500"></canvas>
+                        <div class="empty-overlay" id="emptyOverlay">
+                            <div class="eo-icon">🗺️</div>
+                            <div class="eo-title pulsing">NO DATA LOADED</div>
+                            <div class="eo-sub">Load your locations.txt and roads.txt files using the buttons above to
+                                visualize the city graph.</div>
+                        </div>
+                    </div>
                 </div>
-                <div><span class="tc tb">[7]</span> System Statistics</div>
-                <div><span class="tc tb">[0]</span> Exit</div>
-                <br>
-                <div><span class="tm">»</span> <span class="tb">Choose an option:</span> <span class="tg">_</span></div>
-            </div>
-        </div>
 
-        <!-- MAIN MENU CARDS -->
-        <div class="section-label">Main Menu — 7 Modules</div>
-        <div class="menu-grid">
-            <div class="menu-card" style="--accent:var(--green)">
-                <div class="mc-num">[1]</div>
-                <div class="mc-title">Book a Ride</div>
-                <div class="mc-sub">Core feature — customer books trip</div>
-                <div class="mc-algo">DIJKSTRA</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--cyan)">
-                <div class="mc-num">[2]</div>
-                <div class="mc-title">Customer Management</div>
-                <div class="mc-sub">Register · View · List</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--cyan)">
-                <div class="mc-num">[3]</div>
-                <div class="mc-title">Driver Management</div>
-                <div class="mc-sub">Register · Toggle · Update location</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--yellow)">
-                <div class="mc-num">[4]</div>
-                <div class="mc-title">City Map &amp; Roads</div>
-                <div class="mc-sub">View locations · Add new roads</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--cyan)">
-                <div class="mc-num">[5]</div>
-                <div class="mc-title">Ride History</div>
-                <div class="mc-sub">All rides · Fare · Route · Status</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--magenta)">
-                <div class="mc-num">[6]</div>
-                <div class="mc-title">Algorithm Analysis</div>
-                <div class="mc-sub">DSA showcase — all 6 algorithms</div>
-                <div class="mc-algo">6 ALGORITHMS</div>
-            </div>
-            <div class="menu-card" style="--accent:var(--green)">
-                <div class="mc-num">[7]</div>
-                <div class="mc-title">System Statistics</div>
-                <div class="mc-sub">Revenue · Drivers · Top stats</div>
-            </div>
-        </div>
-
-        <!-- BOOK A RIDE FLOW -->
-        <div class="section-label">Book a Ride — Step by Step Flow</div>
-        <div class="flow">
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 1</div>
-                <div class="flow-step-label">Customer<br>enters ID</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 2</div>
-                <div class="flow-step-label">Pick<br>Drop-off</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 3</div>
-                <div class="flow-step-label">Find Nearest<br>Driver</div>
-                <div class="flow-step-algo">DIJKSTRA</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 4</div>
-                <div class="flow-step-label">Shortest<br>Route</div>
-                <div class="flow-step-algo">DIJKSTRA</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 5</div>
-                <div class="flow-step-label">Fare<br>Calculated</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-num">STEP 6</div>
-                <div class="flow-step-label">Confirm<br>+ Rate</div>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step" style="border-color:var(--green)">
-                <div class="flow-step-num">DONE</div>
-                <div class="flow-step-label" style="color:var(--green)">Saved to<br>rides.txt</div>
-            </div>
-        </div>
-
-        <!-- CITY MAP -->
-        <div class="section-label">City Map — 10 Locations (hover nodes)</div>
-        <div class="map-section">
-            <div class="city-map" id="cityMap">
-                <svg class="map-lines" id="mapSvg"></svg>
-                <!-- nodes positioned by x,y scaled to fit -->
-            </div>
-        </div>
-
-        <!-- ALGORITHMS -->
-        <div class="section-label">6 Algorithms — Details</div>
-        <div class="algo-grid">
-            <div class="algo-card" style="--accent:var(--green)">
-                <div class="algo-name">Dijkstra</div>
-                <div class="algo-type">Graph · Greedy · Shortest Path</div>
-                <div class="algo-desc">Finds the nearest available driver from customer's location. Also computes the
-                    optimal route from pickup to drop-off across the city road graph.</div>
-                <div class="algo-complexity">Time: <span>O((V+E) log V)</span> &nbsp; Space: <span>O(V)</span></div>
-            </div>
-            <div class="algo-card" style="--accent:var(--yellow)">
-                <div class="algo-name">Bellman-Ford</div>
-                <div class="algo-type">Graph · DP · Negative Weights</div>
-                <div class="algo-desc">Handles traffic penalties (negative-weight edges). Detects negative cycles in the
-                    road network. Used for traffic-aware routing in the algorithm menu.</div>
-                <div class="algo-complexity">Time: <span>O(V × E)</span> &nbsp; Space: <span>O(V)</span></div>
-            </div>
-            <div class="algo-card" style="--accent:var(--cyan)">
-                <div class="algo-name">Prim's MST</div>
-                <div class="algo-type">Graph · Greedy · Spanning Tree</div>
-                <div class="algo-desc">Builds the minimum spanning tree of all city zones using a priority queue. Shows
-                    the minimum road infrastructure needed to connect every location.</div>
-                <div class="algo-complexity">Time: <span>O((V+E) log V)</span> &nbsp; Space: <span>O(V)</span></div>
-            </div>
-            <div class="algo-card" style="--accent:var(--magenta)">
-                <div class="algo-name">Kruskal's MST</div>
-                <div class="algo-type">Graph · Union-Find · Spanning Tree</div>
-                <div class="algo-desc">Sorts all roads by distance and uses Union-Find (DSU) to build the MST. Compared
-                    side-by-side with Prim's — both give equal total cost.</div>
-                <div class="algo-complexity">Time: <span>O(E log E)</span> &nbsp; Space: <span>O(V)</span></div>
-            </div>
-            <div class="algo-card" style="--accent:var(--green)">
-                <div class="algo-name">LCS</div>
-                <div class="algo-type">DP · Subsequence · Route Analysis</div>
-                <div class="algo-desc">Finds the Longest Common Subsequence between two customers' location visit
-                    histories. Identifies shared travel zones — useful for carpooling suggestions.</div>
-                <div class="algo-complexity">Time: <span>O(m × n)</span> &nbsp; Space: <span>O(m × n)</span></div>
-            </div>
-            <div class="algo-card" style="--accent:var(--yellow)">
-                <div class="algo-name">LIS</div>
-                <div class="algo-type">DP · Subsequence · Trend Analysis</div>
-                <div class="algo-desc">Finds the Longest Increasing Subsequence of a driver's ride durations over time.
-                    Identifies whether a driver is getting faster or slower across their trips.</div>
-                <div class="algo-complexity">Time: <span>O(n log n)</span> &nbsp; Space: <span>O(n)</span></div>
-            </div>
-        </div>
-
-        <!-- DATA FILES -->
-        <div class="section-label">Data Storage — TXT Files</div>
-        <div class="files-grid">
-            <div class="file-card">
-                <div class="file-icon">📍</div>
-                <div class="file-name">locations.txt</div>
-                <div class="file-desc">City zones with coordinates</div>
-                <div class="file-format">id|name|x|y</div>
-            </div>
-            <div class="file-card">
-                <div class="file-icon">🛣️</div>
-                <div class="file-name">roads.txt</div>
-                <div class="file-desc">Road edges and distances</div>
-                <div class="file-format">from|to|weight</div>
-            </div>
-            <div class="file-card">
-                <div class="file-icon">👤</div>
-                <div class="file-name">customers.txt</div>
-                <div class="file-desc">Customer profiles & history</div>
-                <div class="file-format">id|name|phone|...</div>
-            </div>
-            <div class="file-card">
-                <div class="file-icon">🚗</div>
-                <div class="file-name">drivers.txt</div>
-                <div class="file-desc">Driver profiles & earnings</div>
-                <div class="file-format">id|name|car|...</div>
-            </div>
-            <div class="file-card">
-                <div class="file-icon">🧾</div>
-                <div class="file-name">rides.txt</div>
-                <div class="file-desc">All completed rides</div>
-                <div class="file-format">id|cust|driver|...</div>
-            </div>
-        </div>
-
-        <!-- FILE STRUCTURE -->
-        <div class="section-label">Source File Architecture</div>
-        <div class="terminal">
-            <div class="term-bar">
-                <div class="dot dot-r"></div>
-                <div class="dot dot-y"></div>
-                <div class="dot dot-g"></div>
-                <div class="term-title">uber_system/ — project structure</div>
-            </div>
-            <div class="term-body">
-                <div class="tg">uber_system/</div>
-                <div>├── <span class="tc">uber.h</span> <span class="td">← Data structs + all 6 algorithms (Graph, LCS,
-                        LIS)</span></div>
-                <div>├── <span class="tc">filemanager.h</span> <span class="td">← Read/Write all .txt data files</span>
+                <!-- Roads table -->
+                <div class="info-card">
+                    <div class="panel-title">ROAD LIST <span
+                            style="font-size:9px;color:var(--dim)">from|to|distance|weight</span></div>
+                    <div class="rt-wrap">
+                        <table class="roads-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>FROM</th>
+                                    <th>TO</th>
+                                    <th>DIST (km)</th>
+                                    <th>WEIGHT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roadsTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;color:var(--dim);padding:20px">No roads
+                                        loaded</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div>├── <span class="tc">ui.h</span> <span class="td">← Terminal colors, prompts, tables, banner</span>
+
+                <!-- Algo runner -->
+                <div class="info-card">
+                    <div class="panel-title">PATHFINDING — RUN ALGORITHM</div>
+                    <div class="algo-panel">
+                        <div class="algo-row">
+                            <div>
+                                <div class="algo-src-label">Source</div>
+                                <select class="algo-select" id="algoSrc"></select>
+                            </div>
+                            <div>
+                                <div class="algo-dst-label">Destination</div>
+                                <select class="algo-select" id="algoDst"></select>
+                            </div>
+                        </div>
+                        <div class="algo-btns">
+                            <button class="btn green" onclick="runDijkstra()" style="flex:1;justify-content:center">
+                                ▶ Dijkstra (distance)
+                            </button>
+                            <button class="btn yellow" onclick="runBellmanFord()" style="flex:1;justify-content:center">
+                                ▶ Bellman-Ford (weight)
+                            </button>
+                        </div>
+                        <div class="algo-result" id="algoResult">
+                            <span style="color:var(--dim)">Select source and destination, then run an algorithm.</span>
+                        </div>
+                    </div>
                 </div>
-                <div>├── <span class="tc">ubersystem.h</span> <span class="td">← Core business logic, calls
-                        algorithms</span></div>
-                <div>├── <span class="tc">main.cpp</span> <span class="td">← Entry point, all menu navigation</span>
+
+            </div>
+
+            <!-- RIGHT: SIDEBAR -->
+            <div class="sidebar">
+
+                <!-- Node info -->
+                <div class="info-card">
+                    <div class="panel-title">NODE DETAIL</div>
+                    <div id="nodeDetail">
+                        <div class="placeholder">
+                            <div class="ph-icon">📍</div>
+                            Click any node on the map to see its connections and coordinates.
+                        </div>
+                    </div>
                 </div>
-                <div>│</div>
-                <div>├── <span class="tg">locations.txt</span> <span class="td">← auto-created on first run</span></div>
-                <div>├── <span class="tg">roads.txt</span></div>
-                <div>├── <span class="tg">customers.txt</span></div>
-                <div>├── <span class="tg">drivers.txt</span></div>
-                <div>└── <span class="tg">rides.txt</span></div>
-                <br>
-                <div><span class="ty">$</span> g++ -std=c++17 -O2 -o uber main.cpp</div>
-                <div><span class="ty">$</span> ./uber</div>
+
+                <!-- Legend -->
+                <div class="info-card">
+                    <div class="panel-title">LEGEND</div>
+                    <div class="info-body">
+                        <div class="legend">
+                            <div class="leg-item">
+                                <div class="leg-dot" style="background:#0e1820;border-color:#00e5ff"></div>
+                                <span>Location node</span>
+                            </div>
+                            <div class="leg-item">
+                                <div class="leg-dot" style="background:rgba(0,229,255,.25);border-color:#00e5ff"></div>
+                                <span>Selected node</span>
+                            </div>
+                            <div class="leg-item">
+                                <div class="leg-dot" style="background:rgba(255,214,0,.2);border-color:#ffd600"></div>
+                                <span>Path node (algo)</span>
+                            </div>
+                            <div class="leg-item">
+                                <div class="leg-line" style="background:rgba(0,229,255,.4)"></div>
+                                <span>Normal road (weight ≥ 0)</span>
+                            </div>
+                            <div class="leg-item">
+                                <div class="leg-line" style="background:#00ff88"></div>
+                                <span>Express lane (weight &lt; 0)</span>
+                            </div>
+                            <div class="leg-item">
+                                <div class="leg-line" style="background:#ffd600;height:3px"></div>
+                                <span>Highlighted path</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="info-card">
+                    <div class="panel-title">GRAPH STATS</div>
+                    <div class="info-body" id="graphStats"
+                        style="font-family:var(--mono);font-size:12px;line-height:2;color:var(--dim)">
+                        Load files to see stats.
+                    </div>
+                </div>
+
             </div>
         </div>
-
     </div>
 
+    <div id="tooltip"></div>
+
     <script>
-        // ── Draw city map ──────────────────────────────────────
-        const locations = [
-            { id: 0, name: "Airport", x: 0, y: 0 },
-            { id: 1, name: "City Center", x: 3, y: 4 },
-            { id: 2, name: "North Park", x: 1, y: 8 },
-            { id: 3, name: "East Market", x: 7, y: 3 },
-            { id: 4, name: "West Town", x: -4, y: 5 },
-            { id: 5, name: "South Bay", x: 2, y: -5 },
-            { id: 6, name: "Tech Hub", x: 9, y: 9 },
-            { id: 7, name: "University", x: -2, y: 9 },
-            { id: 8, name: "Hospital", x: 5, y: 1 },
-            { id: 9, name: "Shopping Mall", x: 6, y: 7 },
-        ];
+        // ─────────────────────────────────────────────
+        // STATE
+        // ─────────────────────────────────────────────
+        let locations = [];   // {id, name, x, y}
+        let roads = [];   // {from, to, distance, weight}
+        let locHandle = null; // FileSystemFileHandle for re-read
+        let roadHandle = null;
 
-        const roads = [
-            [0, 1], [0, 5], [0, 8],
-            [1, 2], [1, 3], [1, 4], [1, 8], [1, 9],
-            [2, 4], [2, 7],
-            [3, 6], [3, 8], [3, 9],
-            [4, 7], [5, 8],
-            [6, 9], [7, 2], [9, 6]
-        ];
+        let selectedNode = null;
+        let highlightPath = [];   // node id array for algo result
+        let algoMode = null;      // 'dijkstra' | 'bf'
 
-        const mapEl = document.getElementById('cityMap');
-        const svgEl = document.getElementById('mapSvg');
-        const W = mapEl.offsetWidth || 800;
-        const H = mapEl.offsetHeight || 340;
-        const PAD = 50;
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
 
-        // Scale x,y to fit canvas
-        const xs = locations.map(l => l.x), ys = locations.map(l => l.y);
-        const minX = Math.min(...xs), maxX = Math.max(...xs);
-        const minY = Math.min(...ys), maxY = Math.max(...ys);
+        // ─────────────────────────────────────────────
+        // FILE LOADING (File System Access API)
+        // ─────────────────────────────────────────────
+        async function loadLocations() {
+            try {
+                const [handle] = await window.showOpenFilePicker({
+                    types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }],
+                    multiple: false
+                });
+                locHandle = handle;
+                await readLocations();
+            } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
+        }
 
-        function scaleX(x) { return PAD + (x - minX) / (maxX - minX) * (W - PAD * 2); }
-        function scaleY(y) { return H - PAD - (y - minY) / (maxY - minY) * (H - PAD * 2); }
+        async function loadRoads() {
+            try {
+                const [handle] = await window.showOpenFilePicker({
+                    types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }],
+                    multiple: false
+                });
+                roadHandle = handle;
+                await readRoads();
+            } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
+        }
 
-        // Draw SVG lines
-        roads.forEach(([a, b]) => {
-            const la = locations[a], lb = locations[b];
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute('x1', scaleX(la.x));
-            line.setAttribute('y1', scaleY(la.y));
-            line.setAttribute('x2', scaleX(lb.x));
-            line.setAttribute('y2', scaleY(lb.y));
-            svgEl.appendChild(line);
+        async function readLocations() {
+            const file = await locHandle.getFile();
+            const text = await file.text();
+            locations = parseLocations(text);
+            document.getElementById('locDot').classList.add('ok');
+            document.getElementById('locStatus').textContent = `${locations.length} nodes`;
+            rebuildAll();
+        }
+
+        async function readRoads() {
+            const file = await roadHandle.getFile();
+            const text = await file.text();
+            roads = parseRoads(text);
+            document.getElementById('roadDot').classList.add('ok');
+            document.getElementById('roadStatus').textContent = `${roads.length} edges`;
+            rebuildAll();
+        }
+
+        async function refreshAll() {
+            if (locHandle) await readLocations();
+            if (roadHandle) await readRoads();
+            if (!locHandle && !roadHandle) alert('No files loaded yet. Use the Load buttons first.');
+        }
+
+        // ─────────────────────────────────────────────
+        // PARSERS
+        // ─────────────────────────────────────────────
+        function parseLocations(text) {
+            return text.trim().split('\n')
+                .filter(l => l.trim())
+                .map(line => {
+                    const p = line.split('|');
+                    return { id: parseInt(p[0]), name: p[1].trim(), x: parseFloat(p[2]), y: parseFloat(p[3]) };
+                })
+                .filter(l => !isNaN(l.id));
+        }
+
+        function parseRoads(text) {
+            return text.trim().split('\n')
+                .filter(l => l.trim())
+                .map(line => {
+                    const p = line.split('|');
+                    return { from: parseInt(p[0]), to: parseInt(p[1]), distance: parseFloat(p[2]), weight: parseInt(p[3]) };
+                })
+                .filter(r => !isNaN(r.from));
+        }
+
+        // ─────────────────────────────────────────────
+        // REBUILD AFTER LOAD
+        // ─────────────────────────────────────────────
+        function rebuildAll() {
+            highlightPath = [];
+            selectedNode = null;
+            updateStatus();
+            populateAlgoSelects();
+            buildRoadsTable();
+            updateGraphStats();
+            draw();
+            document.getElementById('emptyOverlay').classList.add('hidden');
+            document.getElementById('algoResult').innerHTML = '<span style="color:var(--dim)">Select source and destination, then run an algorithm.</span>';
+            document.getElementById('nodeDetail').innerHTML = `<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>`;
+        }
+
+        function updateStatus() {
+            const neg = roads.filter(r => r.weight < 0).length;
+            document.getElementById('nodeCount').textContent = locations.length;
+            document.getElementById('edgeCount').textContent = roads.length;
+            document.getElementById('negCount').textContent = neg;
+            document.getElementById('badgeNodes').textContent = locations.length + ' nodes';
+            document.getElementById('badgeEdges').textContent = roads.length + ' edges';
+            document.getElementById('badgeNeg').textContent = neg + ' express';
+        }
+
+        function populateAlgoSelects() {
+            ['algoSrc', 'algoDst'].forEach(id => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = locations.map(l => `<option value="${l.id}">[${l.id}] ${l.name}</option>`).join('');
+            });
+            if (locations.length > 1) document.getElementById('algoDst').value = locations[1].id;
+        }
+
+        function buildRoadsTable() {
+            const tbody = document.getElementById('roadsTableBody');
+            if (!roads.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">No roads loaded</td></tr>'; return; }
+            tbody.innerHTML = roads.map((r, i) => {
+                const fromName = locName(r.from), toName = locName(r.to);
+                const neg = r.weight < 0;
+                return `<tr>
+      <td style="color:var(--dim)">${i}</td>
+      <td class="r-from">${fromName}</td>
+      <td class="r-to">${toName}</td>
+      <td class="r-dist">${r.distance.toFixed(2)}</td>
+      <td class="r-wt${neg ? ' neg' : ''}">
+        ${r.weight}${neg ? '<span class="r-neg-badge">express</span>' : ''}
+      </td>
+    </tr>`;
+            }).join('');
+        }
+
+        function updateGraphStats() {
+            const neg = roads.filter(r => r.weight < 0).length;
+            const avgDist = roads.length ? (roads.reduce((a, r) => a + r.distance, 0) / roads.length).toFixed(2) : '—';
+            const minW = roads.length ? Math.min(...roads.map(r => r.weight)) : '—';
+            const maxW = roads.length ? Math.max(...roads.map(r => r.weight)) : '—';
+            document.getElementById('graphStats').innerHTML = `
+    <div style="color:var(--dim)">Nodes: <span style="color:var(--cyan)">${locations.length}</span></div>
+    <div style="color:var(--dim)">Edges: <span style="color:var(--cyan)">${roads.length}</span></div>
+    <div style="color:var(--dim)">Express lanes: <span style="color:var(--green)">${neg}</span></div>
+    <div style="color:var(--dim)">Avg distance: <span style="color:var(--cyan)">${avgDist} km</span></div>
+    <div style="color:var(--dim)">Weight range: <span style="color:var(--yellow)">${minW} → ${maxW}</span></div>
+    <div style="color:var(--dim)">Density: <span style="color:var(--cyan)">${locations.length ? (roads.length / (locations.length * (locations.length - 1) / 2) * 100).toFixed(1) + '%' : '—'}</span></div>
+  `;
+        }
+
+        function locName(id) {
+            const l = locations.find(x => x.id === id);
+            return l ? l.name : `#${id}`;
+        }
+
+        // ─────────────────────────────────────────────
+        // CANVAS DRAWING
+        // ─────────────────────────────────────────────
+        let scale = { ox: 0, oy: 0, sx: 1, sy: 1 };
+
+        function computeScale() {
+            if (!locations.length) return;
+            const W = canvas.width, H = canvas.height;
+            const PAD = 64;
+            const xs = locations.map(l => l.x), ys = locations.map(l => l.y);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            const rw = maxX - minX || 1, rh = maxY - minY || 1;
+            scale.sx = (W - PAD * 2) / rw;
+            scale.sy = (H - PAD * 2) / rh;
+            scale.ox = PAD - minX * scale.sx;
+            scale.oy = H - PAD + minY * scale.sy;
+        }
+
+        function toCanvas(x, y) { return [x * scale.sx + scale.ox, scale.oy - y * scale.sy]; }
+
+        function draw() {
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            if (!locations.length) return;
+            computeScale();
+
+            // Draw roads
+            roads.forEach(r => {
+                const la = locations.find(x => x.id === r.from);
+                const lb = locations.find(x => x.id === r.to);
+                if (!la || !lb) return;
+                const [ax, ay] = toCanvas(la.x, la.y);
+                const [bx, by] = toCanvas(lb.x, lb.y);
+
+                const inPath = highlightPath.length >= 2 &&
+                    highlightPath.some((n, i) => i < highlightPath.length - 1 &&
+                        ((highlightPath[i] === r.from && highlightPath[i + 1] === r.to) ||
+                            (highlightPath[i] === r.to && highlightPath[i + 1] === r.from)));
+
+                ctx.beginPath();
+                ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+
+                if (inPath) {
+                    ctx.strokeStyle = '#ffd600';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([]);
+                } else if (r.weight < 0) {
+                    ctx.strokeStyle = 'rgba(0,255,136,0.55)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 4]);
+                } else {
+                    ctx.strokeStyle = 'rgba(0,229,255,0.18)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 5]);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Label on road midpoint
+                const mx = (ax + bx) / 2, my = (ay + by) / 2;
+                ctx.font = '9px Share Tech Mono';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const distLabel = r.distance.toFixed(1) + 'km';
+                const wtLabel = r.weight < 0 ? `w:${r.weight}` : '';
+
+                if (inPath) {
+                    ctx.fillStyle = 'rgba(6,10,15,0.85)';
+                    ctx.fillRect(mx - 22, my - 9, 44, 18);
+                    ctx.fillStyle = '#ffd600';
+                    ctx.fillText(distLabel, mx, my);
+                } else if (r.weight < 0) {
+                    ctx.fillStyle = 'rgba(6,10,15,0.8)';
+                    ctx.fillRect(mx - 22, my - 10, 44, 20);
+                    ctx.fillStyle = 'rgba(0,255,136,0.7)';
+                    ctx.fillText(distLabel, mx, my - 3);
+                    ctx.fillStyle = 'rgba(0,255,136,0.5)';
+                    ctx.fillText(wtLabel, mx, my + 6);
+                } else {
+                    ctx.fillStyle = 'rgba(0,229,255,0.3)';
+                    ctx.fillText(distLabel, mx, my);
+                }
+            });
+
+            // Draw nodes
+            locations.forEach(loc => {
+                const [cx, cy] = toCanvas(loc.x, loc.y);
+                const isSelected = selectedNode && selectedNode.id === loc.id;
+                const inPath = highlightPath.includes(loc.id);
+                const R = 18;
+
+                // glow
+                if (isSelected || inPath) {
+                    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 2.5);
+                    const gc = isSelected ? 'rgba(0,229,255,' : 'rgba(255,214,0,';
+                    glow.addColorStop(0, gc + '0.2)');
+                    glow.addColorStop(1, gc + '0)');
+                    ctx.beginPath(); ctx.arc(cx, cy, R * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = glow; ctx.fill();
+                }
+
+                // circle fill
+                ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+                ctx.fillStyle = isSelected ? 'rgba(0,229,255,0.2)' : inPath ? 'rgba(255,214,0,0.15)' : '#0e1820';
+                ctx.fill();
+
+                // circle border
+                ctx.strokeStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(0,229,255,0.4)';
+                ctx.lineWidth = isSelected ? 2.5 : inPath ? 2 : 1.5;
+                ctx.stroke();
+
+                // id text
+                ctx.font = `bold 11px Share Tech Mono`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(0,229,255,0.8)';
+                ctx.fillText(loc.id, cx, cy);
+
+                // name label below
+                ctx.font = '10px Rajdhani';
+                ctx.fillStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(184,207,232,0.6)';
+                ctx.fillText(loc.name, cx, cy + R + 10);
+            });
+        }
+
+        // ─────────────────────────────────────────────
+        // INTERACTION
+        // ─────────────────────────────────────────────
+        canvas.addEventListener('click', e => {
+            if (!locations.length) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+
+            let hit = null, best = Infinity;
+            locations.forEach(loc => {
+                const [cx, cy] = toCanvas(loc.x, loc.y);
+                const d = Math.hypot(mx - cx, my - cy);
+                if (d < 24 && d < best) { best = d; hit = loc; }
+            });
+
+            selectedNode = hit;
+            if (hit) showNodeDetail(hit);
+            else document.getElementById('nodeDetail').innerHTML = `<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>`;
+            draw();
         });
 
-        // Draw nodes
-        locations.forEach(loc => {
-            const px = scaleX(loc.x), py = scaleY(loc.y);
-            const node = document.createElement('div');
-            node.className = 'map-node';
-            node.style.left = (px - 22) + 'px';
-            node.style.top = (py - 22) + 'px';
-            node.innerHTML = `${loc.id}<div class="node-label">${loc.name}</div>
-    <div class="tooltip-box">ID:${loc.id} | ${loc.name}<br>x:${loc.x} y:${loc.y}</div>`;
-            mapEl.appendChild(node);
+        const tooltip = document.getElementById('tooltip');
+        canvas.addEventListener('mousemove', e => {
+            if (!locations.length) { tooltip.style.display = 'none'; return; }
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+
+            let hit = null, best = Infinity;
+            locations.forEach(loc => {
+                const [cx, cy] = toCanvas(loc.x, loc.y);
+                const d = Math.hypot(mx - cx, my - cy);
+                if (d < 24 && d < best) { best = d; hit = loc; }
+            });
+
+            if (hit) {
+                const conns = roads.filter(r => r.from === hit.id || r.to === hit.id);
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 14) + 'px';
+                tooltip.style.top = (e.clientY - 10) + 'px';
+                tooltip.innerHTML = `<b style="color:#00e5ff">${hit.name}</b><br>
+      ID: ${hit.id} | x: ${hit.x} y: ${hit.y}<br>
+      Connections: ${conns.length}`;
+                canvas.style.cursor = 'pointer';
+            } else {
+                tooltip.style.display = 'none';
+                canvas.style.cursor = 'crosshair';
+            }
         });
+        canvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+        function showNodeDetail(loc) {
+            const conns = roads.filter(r => r.from === loc.id || r.to === loc.id);
+            const connHTML = conns.map(r => {
+                const otherId = r.from === loc.id ? r.to : r.from;
+                const neg = r.weight < 0;
+                return `<div class="conn-item">
+      <span class="conn-dest">${locName(otherId)}</span>
+      <span class="conn-meta">
+        <span class="conn-dist">${r.distance.toFixed(2)}km</span>
+        <span class="conn-wt${neg ? ' neg' : ''}">w:${r.weight}${neg ? ' ★' : ''}</span>
+      </span>
+    </div>`;
+            }).join('');
+
+            document.getElementById('nodeDetail').innerHTML = `
+    <div class="info-body">
+      <div class="nd-name">${loc.name}</div>
+      <div class="nd-id">ID #${loc.id}</div>
+      <div class="nd-coord">x: ${loc.x}  y: ${loc.y}</div>
+      <div class="nd-connections">Connections (${conns.length})</div>
+      <div class="conn-list">${connHTML || '<div style="color:var(--dim);font-size:12px">No connections</div>'}</div>
+    </div>`;
+        }
+
+        // ─────────────────────────────────────────────
+        // ALGORITHMS (JavaScript implementation)
+        // ─────────────────────────────────────────────
+
+        // Build adjacency for Dijkstra (distance-based)
+        function buildAdjDist() {
+            const adj = {};
+            locations.forEach(l => adj[l.id] = []);
+            roads.forEach(r => {
+                adj[r.from].push({ node: r.to, cost: r.distance });
+                adj[r.to].push({ node: r.from, cost: r.distance });
+            });
+            return adj;
+        }
+
+        // Build adjacency for Bellman-Ford (weight-based, edge list)
+        function buildEdgeList() {
+            const edges = [];
+            roads.forEach(r => {
+                edges.push({ from: r.from, to: r.to, cost: r.weight });
+                edges.push({ from: r.to, to: r.from, cost: r.weight });
+            });
+            return edges;
+        }
+
+        function dijkstra(srcId, dstId) {
+            const adj = buildAdjDist();
+            const INF = 1e18;
+            const dist = {}, prev = {};
+            locations.forEach(l => { dist[l.id] = INF; prev[l.id] = -1; });
+            dist[srcId] = 0;
+
+            // simple priority queue using array
+            const pq = [{ node: srcId, cost: 0 }];
+            while (pq.length) {
+                pq.sort((a, b) => a.cost - b.cost);
+                const { node: u, cost: d } = pq.shift();
+                if (d > dist[u]) continue;
+                for (const { node: v, cost: w } of (adj[u] || [])) {
+                    if (dist[u] + w < dist[v]) {
+                        dist[v] = dist[u] + w;
+                        prev[v] = u;
+                        pq.push({ node: v, cost: dist[v] });
+                    }
+                }
+            }
+            return { dist, prev };
+        }
+
+        function bellmanFord(srcId, dstId) {
+            const edges = buildEdgeList();
+            const INF = 1e18;
+            const dist = {}, prev = {};
+            locations.forEach(l => { dist[l.id] = INF; prev[l.id] = -1; });
+            dist[srcId] = 0;
+
+            for (let i = 0; i < locations.length - 1; i++) {
+                let updated = false;
+                for (const e of edges) {
+                    if (dist[e.from] < INF && dist[e.from] + e.cost < dist[e.to]) {
+                        dist[e.to] = dist[e.from] + e.cost;
+                        prev[e.to] = e.from;
+                        updated = true;
+                    }
+                }
+                if (!updated) break;
+            }
+
+            // negative cycle check
+            for (const e of edges) {
+                if (dist[e.from] < INF && dist[e.from] + e.cost < dist[e.to])
+                    return { dist, prev, negCycle: true };
+            }
+            return { dist, prev, negCycle: false };
+        }
+
+        function reconstructPath(prev, srcId, dstId) {
+            const path = [];
+            for (let at = dstId; at !== -1; at = prev[at]) path.push(at);
+            path.reverse();
+            return path[0] === srcId ? path : [];
+        }
+
+        function sumPathDist(path) {
+            let t = 0;
+            for (let i = 0; i < path.length - 1; i++) {
+                const r = roads.find(r => (r.from === path[i] && r.to === path[i + 1]) || (r.to === path[i] && r.from === path[i + 1]));
+                if (r) t += r.distance;
+            }
+            return t;
+        }
+
+        function sumPathWeight(path) {
+            let t = 0;
+            for (let i = 0; i < path.length - 1; i++) {
+                const r = roads.find(r => (r.from === path[i] && r.to === path[i + 1]) || (r.to === path[i] && r.from === path[i + 1]));
+                if (r) t += r.weight;
+            }
+            return t;
+        }
+
+        function runDijkstra() {
+            if (!locations.length) { alert('Load files first!'); return; }
+            const src = parseInt(document.getElementById('algoSrc').value);
+            const dst = parseInt(document.getElementById('algoDst').value);
+            if (src === dst) { showAlgoResult('<span class="ar-err">Source and destination must differ.</span>'); return; }
+
+            const { dist, prev } = dijkstra(src, dst);
+            if (dist[dst] >= 1e17) { showAlgoResult('<span class="ar-err">No path found.</span>'); highlightPath = []; draw(); return; }
+
+            const path = reconstructPath(prev, src, dst);
+            const totalDist = sumPathDist(path);
+            const totalWt = sumPathWeight(path);
+            highlightPath = path;
+            draw();
+
+            const pathStr = path.map(id => locName(id)).join(' → ');
+            showAlgoResult(`
+    <span class="ar-algo">▶ DIJKSTRA (shortest by Euclidean distance)</span><br>
+    <span class="ar-path">${pathStr}</span><br>
+    <span class="ar-dist">Total distance : ${totalDist.toFixed(2)} km</span><br>
+    <span class="ar-wt">Traffic weight : ${totalWt}</span><br>
+    <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
+  `);
+        }
+
+        function runBellmanFord() {
+            if (!locations.length) { alert('Load files first!'); return; }
+            const src = parseInt(document.getElementById('algoSrc').value);
+            const dst = parseInt(document.getElementById('algoDst').value);
+            if (src === dst) { showAlgoResult('<span class="ar-err">Source and destination must differ.</span>'); return; }
+
+            const { dist, prev, negCycle } = bellmanFord(src, dst);
+            if (negCycle) { showAlgoResult('<span class="ar-err">⚠ Negative cycle detected — Bellman-Ford cannot guarantee a result.</span>'); highlightPath = []; draw(); return; }
+            if (dist[dst] >= 1e17) { showAlgoResult('<span class="ar-err">No path found.</span>'); highlightPath = []; draw(); return; }
+
+            const path = reconstructPath(prev, src, dst);
+            const totalDist = sumPathDist(path);
+            const totalWt = sumPathWeight(path);
+            highlightPath = path;
+            draw();
+
+            const pathStr = path.map(id => locName(id)).join(' → ');
+            showAlgoResult(`
+    <span class="ar-algo">▶ BELLMAN-FORD (shortest by traffic weight — negatives OK)</span><br>
+    <span class="ar-path">${pathStr}</span><br>
+    <span class="ar-dist">Total distance : ${totalDist.toFixed(2)} km</span><br>
+    <span class="ar-wt">Total weight   : ${totalWt}${totalWt < 0 ? ' ✦ used express lane(s)' : ''}</span><br>
+    <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
+  `);
+        }
+
+        function showAlgoResult(html) {
+            document.getElementById('algoResult').innerHTML = html;
+        }
+
+        // ─────────────────────────────────────────────
+        // CANVAS RESIZE
+        // ─────────────────────────────────────────────
+        function resizeCanvas() {
+            const panel = canvas.parentElement;
+            canvas.width = panel.offsetWidth;
+            canvas.height = Math.max(420, panel.offsetWidth * 0.55);
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Initial empty draw
+        ctx.fillStyle = 'rgba(0,229,255,0.03)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 

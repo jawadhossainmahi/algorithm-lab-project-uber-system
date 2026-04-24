@@ -2,7 +2,7 @@
 #include "uber.h"
 
 // ─────────────────────────────────────────────
-//  TERMINAL UI HELPERS
+// TERMINAL UI HELPERS
 // ─────────────────────────────────────────────
 namespace UI
 {
@@ -32,7 +32,7 @@ namespace UI
              << CYAN << BOLD;
         line("═");
         int pad = (58 - (int)title.size()) / 2;
-        cout << "  " << string(max(0, pad), ' ') << title << "\n";
+        cout << " " << string(max(0, pad), ' ') << title << "\n";
         line("═");
         cout << RESET;
     }
@@ -40,35 +40,29 @@ namespace UI
     void subHeader(const string &title)
     {
         cout << "\n"
-             << YELLOW << BOLD << "  >> " << title << RESET << "\n";
+             << YELLOW << BOLD << " >> " << title << RESET << "\n";
         cout << YELLOW;
         line("─");
         cout << RESET;
     }
 
-    void success(const string &msg)
-    {
-        cout << GREEN << BOLD << "  ✔  " << msg << RESET << "\n";
-    }
+    void success(const string &msg) { cout << GREEN << BOLD << " ✔ " << msg << RESET << "\n"; }
+    void error(const string &msg) { cout << RED << BOLD << " ✘ " << msg << RESET << "\n"; }
+    void info(const string &msg) { cout << CYAN << " ℹ " << msg << RESET << "\n"; }
+    void warn(const string &msg) { cout << YELLOW << " ⚠ " << msg << RESET << "\n"; }
 
-    void error(const string &msg)
+    void algoBox(const string &algo, const string &reason)
     {
-        cout << RED << BOLD << "  ✘  " << msg << RESET << "\n";
-    }
-
-    void info(const string &msg)
-    {
-        cout << CYAN << "  ℹ  " << msg << RESET << "\n";
-    }
-
-    void warn(const string &msg)
-    {
-        cout << YELLOW << "  ⚠  " << msg << RESET << "\n";
+        cout << "\n";
+        cout << CYAN << BOLD << " ┌─────────────────────────────────────────┐\n";
+        cout << " │  Algorithm : " << left << setw(27) << algo << "│\n";
+        cout << " │  Reason    : " << left << setw(27) << reason << "│\n";
+        cout << " └─────────────────────────────────────────┘" << RESET << "\n\n";
     }
 
     void prompt(const string &msg)
     {
-        cout << BOLD << MAGENTA << "\n  » " << msg << ": " << RESET;
+        cout << BOLD << MAGENTA << "\n » " << msg << ": " << RESET;
     }
 
     void menuItem(int n, const string &label)
@@ -97,6 +91,27 @@ namespace UI
         }
     }
 
+    double getDouble(const string &p, double lo = 0.0, double hi = 1e9)
+    {
+        while (true)
+        {
+            prompt(p);
+            string s;
+            getline(cin, s);
+            try
+            {
+                double v = stod(s);
+                if (v >= lo && v <= hi)
+                    return v;
+                error("Enter a value between " + to_string(lo) + " and " + to_string(hi));
+            }
+            catch (...)
+            {
+                error("Invalid number. Try again.");
+            }
+        }
+    }
+
     string getString(const string &p)
     {
         prompt(p);
@@ -108,8 +123,8 @@ namespace UI
     void pause()
     {
         cout << BOLD << "\n  Press ENTER to continue..." << RESET;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cin.get();
+        string tmp;
+        getline(cin, tmp);
     }
 
     void banner()
@@ -117,29 +132,27 @@ namespace UI
         clearScreen();
         cout << CYAN << BOLD;
         cout << R"(
-  ╔══════════════════════════════════════════════════════════╗
-  ║                                                          ║
-  ║   ██╗   ██╗██████╗ ███████╗██████╗                       ║
-  ║   ██║   ██║██╔══██╗██╔════╝██╔══██╗                      ║
-  ║   ██║   ██║██████╔╝█████╗  ██████╔╝                      ║
-  ║   ██║   ██║██╔══██╗██╔══╝  ██╔══██╗                      ║
-  ║   ╚██████╔╝██████╔╝███████╗██║  ██║                      ║
-  ║    ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  SYSTEM              ║
-  ║                                                          ║
-  ║         DSA-Powered Ride Management Platform             ║
-  ╚══════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════╗
+║                                                          ║
+║   ██╗   ██╗██████╗ ███████╗██████╗                      ║
+║   ██║   ██║██╔══██╗██╔════╝██╔══██╗                     ║
+║   ██║   ██║██████╔╝█████╗  ██████╔╝                     ║
+║   ██║   ██║██╔══██╗██╔══╝  ██╔══██╗                     ║
+║   ╚██████╔╝██████╔╝███████╗██║  ██║                     ║
+║    ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  SYSTEM            ║
+║                                                          ║
+║   DSA-Powered Ride Management  |  Dijkstra + Bellman    ║
+╚══════════════════════════════════════════════════════════╝
 )";
         cout << RESET;
     }
 
-    // Display a table row
-    void tableRow(const string &label, const string &value, int width = 20)
+    void tableRow(const string &label, const string &value, int width = 22)
     {
         cout << "  " << BOLD << left << setw(width) << label << RESET
              << " : " << value << "\n";
     }
 
-    // Stars for rating
     string stars(double rating)
     {
         string s;

@@ -1,10 +1,10 @@
-0|Airport|0|0
-1|City Center|3|4
-2|North Park|1|8
-3|East Market|7|3
-4|West Town|-4|5
-5|South Bay|2|-5
-6|Tech Hub|9|9
-7|University|-2|9
-8|Hospital|5|1
-9|Shopping Mall|6|7
+0|Airport|0.0000|0.0000
+1|City Center|3.0000|4.0000
+2|North Park|1.0000|8.0000
+3|East Market|7.0000|3.0000
+4|West Town|-4.0000|5.0000
+5|South Bay|2.0000|-5.0000
+6|Tech Hub|9.0000|9.0000
+7|University|-2.0000|9.0000
+8|Hospital|5.0000|1.0000
+9|Shopping Mall|6.0000|7.0000
