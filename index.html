@@ -40,7 +40,6 @@
             overflow-x: hidden;
         }
 
-        /* scanline texture */
         body::after {
             content: '';
             position: fixed;
@@ -50,7 +49,6 @@
             z-index: 9999;
         }
 
-        /* grid overlay */
         body::before {
             content: '';
             position: fixed;
@@ -106,6 +104,12 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* hidden file inputs */
+        input[type="file"] {
+            display: none;
         }
 
         .btn {
@@ -122,6 +126,7 @@
             align-items: center;
             gap: 8px;
             letter-spacing: 1px;
+            user-select: none;
         }
 
         .btn:hover {
@@ -302,7 +307,6 @@
             padding: 14px 16px;
         }
 
-        /* node detail */
         .nd-name {
             font-size: 18px;
             font-weight: 700;
@@ -387,7 +391,6 @@
             margin-bottom: 10px;
         }
 
-        /* legend */
         .legend {
             display: flex;
             flex-direction: column;
@@ -416,7 +419,6 @@
             flex-shrink: 0;
         }
 
-        /* roads table */
         .rt-wrap {
             overflow-y: auto;
             max-height: 220px;
@@ -480,7 +482,6 @@
             margin-left: 4px;
         }
 
-        /* algo panel */
         .algo-panel {
             padding: 14px 16px;
         }
@@ -559,7 +560,6 @@
             color: var(--red);
         }
 
-        /* empty state overlay */
         .empty-overlay {
             position: absolute;
             inset: 0;
@@ -601,7 +601,6 @@
             max-width: 280px;
         }
 
-        /* tooltip */
         #tooltip {
             position: fixed;
             pointer-events: none;
@@ -619,7 +618,6 @@
             box-shadow: 0 0 20px rgba(0, 229, 255, .2);
         }
 
-        /* notice */
         .notice {
             font-family: var(--mono);
             font-size: 11px;
@@ -655,37 +653,41 @@
 </head>
 
 <body>
+    <!-- hidden file inputs — work on file://, Live Server, everywhere -->
+    <input type="file" id="locFileInput" accept=".txt" onchange="onLocFile(event)">
+    <input type="file" id="roadFileInput" accept=".txt" onchange="onRoadFile(event)">
+
     <div class="app">
 
         <!-- HEADER -->
         <header>
             <div class="logo">
                 UBER<em>DSA</em>
-                <span>CITY MAP VISUALIZER — live from .txt files</span>
+                <span>CITY MAP VISUALIZER — local .txt files</span>
             </div>
             <div class="load-btns">
-                <button class="btn green" onclick="loadLocations()">
+                <label class="btn green" for="locFileInput">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                     Load locations.txt
-                </button>
-                <button class="btn yellow" onclick="loadRoads()">
+                </label>
+                <label class="btn yellow" for="roadFileInput">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                     Load roads.txt
-                </button>
-                <button class="btn" onclick="refreshAll()">
+                </label>
+                <button class="btn" onclick="reloadBoth()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="23 4 23 10 17 10" />
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                     </svg>
-                    Refresh
+                    Reload Both
                 </button>
             </div>
         </header>
@@ -693,21 +695,22 @@
         <!-- NOTICE -->
         <div class="notice">
             <strong>How to use:</strong> Click <strong>Load locations.txt</strong> then <strong>Load roads.txt</strong>
-            — both files must be in the same folder as your C++ project.
-            After editing the .txt files via the terminal program, click <strong>Refresh</strong> to re-read them and
-            update the map instantly.
+            and pick the files from your project folder. After your C++ program updates the .txt files,
+            click <strong>Reload Both</strong> to re-read the same files instantly — no picking again.
             Roads with <strong style="color:var(--green)">negative weight</strong> are shown in green (express lanes).
         </div>
 
         <!-- STATUS BAR -->
         <div class="status-bar">
             <div class="s-item">
-                <div class="s-dot" id="locDot"></div><span>locations.txt</span><span class="s-val" id="locStatus">not
-                    loaded</span>
+                <div class="s-dot" id="locDot"></div>
+                <span>locations.txt</span>
+                <span class="s-val" id="locStatus">not loaded</span>
             </div>
             <div class="s-item">
-                <div class="s-dot" id="roadDot"></div><span>roads.txt</span><span class="s-val" id="roadStatus">not
-                    loaded</span>
+                <div class="s-dot" id="roadDot"></div>
+                <span>roads.txt</span>
+                <span class="s-val" id="roadStatus">not loaded</span>
             </div>
             <div class="s-item"><span>Nodes:</span><span class="s-val" id="nodeCount">—</span></div>
             <div class="s-item"><span>Edges:</span><span class="s-val" id="edgeCount">—</span></div>
@@ -717,11 +720,9 @@
 
         <!-- MAIN LAYOUT -->
         <div class="layout">
-
-            <!-- LEFT: MAP + TABS -->
             <div style="display:flex;flex-direction:column;gap:14px;">
 
-                <!-- Map canvas -->
+                <!-- Map -->
                 <div class="map-panel">
                     <div class="panel-title">
                         CITY GRAPH
@@ -736,8 +737,8 @@
                         <div class="empty-overlay" id="emptyOverlay">
                             <div class="eo-icon">🗺️</div>
                             <div class="eo-title pulsing">NO DATA LOADED</div>
-                            <div class="eo-sub">Load your locations.txt and roads.txt files using the buttons above to
-                                visualize the city graph.</div>
+                            <div class="eo-sub">Click the green/yellow buttons above and pick your locations.txt and
+                                roads.txt from your project folder.</div>
                         </div>
                     </div>
                 </div>
@@ -782,25 +783,20 @@
                             </div>
                         </div>
                         <div class="algo-btns">
-                            <button class="btn green" onclick="runDijkstra()" style="flex:1;justify-content:center">
-                                ▶ Dijkstra (distance)
-                            </button>
-                            <button class="btn yellow" onclick="runBellmanFord()" style="flex:1;justify-content:center">
-                                ▶ Bellman-Ford (weight)
-                            </button>
+                            <button class="btn green" onclick="runDijkstra()" style="flex:1;justify-content:center">▶
+                                Dijkstra (distance)</button>
+                            <button class="btn yellow" onclick="runBellmanFord()"
+                                style="flex:1;justify-content:center">▶ Bellman-Ford (weight)</button>
                         </div>
                         <div class="algo-result" id="algoResult">
                             <span style="color:var(--dim)">Select source and destination, then run an algorithm.</span>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <!-- RIGHT: SIDEBAR -->
+            <!-- SIDEBAR -->
             <div class="sidebar">
-
-                <!-- Node info -->
                 <div class="info-card">
                     <div class="panel-title">NODE DETAIL</div>
                     <div id="nodeDetail">
@@ -811,7 +807,6 @@
                     </div>
                 </div>
 
-                <!-- Legend -->
                 <div class="info-card">
                     <div class="panel-title">LEGEND</div>
                     <div class="info-body">
@@ -829,22 +824,21 @@
                                 <span>Path node (algo)</span>
                             </div>
                             <div class="leg-item">
-                                <div class="leg-line" style="background:rgba(0,229,255,.4)"></div>
-                                <span>Normal road (weight ≥ 0)</span>
+                                <div class="leg-line" style="background:rgba(0,229,255,.4)"></div><span>Normal road
+                                    (weight ≥ 0)</span>
                             </div>
                             <div class="leg-item">
-                                <div class="leg-line" style="background:#00ff88"></div>
-                                <span>Express lane (weight &lt; 0)</span>
+                                <div class="leg-line" style="background:#00ff88"></div><span>Express lane (weight &lt;
+                                    0)</span>
                             </div>
                             <div class="leg-item">
-                                <div class="leg-line" style="background:#ffd600;height:3px"></div>
-                                <span>Highlighted path</span>
+                                <div class="leg-line" style="background:#ffd600;height:3px"></div><span>Highlighted
+                                    path</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Stats -->
                 <div class="info-card">
                     <div class="panel-title">GRAPH STATS</div>
                     <div class="info-body" id="graphStats"
@@ -852,7 +846,6 @@
                         Load files to see stats.
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -863,65 +856,66 @@
         // ─────────────────────────────────────────────
         // STATE
         // ─────────────────────────────────────────────
-        let locations = [];   // {id, name, x, y}
-        let roads = [];   // {from, to, distance, weight}
-        let locHandle = null; // FileSystemFileHandle for re-read
-        let roadHandle = null;
+        let locations = [];
+        let roads = [];
+        let locFile = null;   // stores the File object for re-read
+        let roadFile = null;
 
         let selectedNode = null;
-        let highlightPath = [];   // node id array for algo result
-        let algoMode = null;      // 'dijkstra' | 'bf'
+        let highlightPath = [];
 
         const canvas = document.getElementById('mapCanvas');
         const ctx = canvas.getContext('2d');
 
         // ─────────────────────────────────────────────
-        // FILE LOADING (File System Access API)
+        // FILE INPUT HANDLERS  (works on file:// too)
         // ─────────────────────────────────────────────
-        async function loadLocations() {
-            try {
-                const [handle] = await window.showOpenFilePicker({
-                    types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }],
-                    multiple: false
-                });
-                locHandle = handle;
-                await readLocations();
-            } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
+        function onLocFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            locFile = file;
+            readLocFile();
         }
 
-        async function loadRoads() {
-            try {
-                const [handle] = await window.showOpenFilePicker({
-                    types: [{ description: 'Text files', accept: { 'text/plain': ['.txt'] } }],
-                    multiple: false
-                });
-                roadHandle = handle;
-                await readRoads();
-            } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
+        function onRoadFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            roadFile = file;
+            readRoadFile();
         }
 
-        async function readLocations() {
-            const file = await locHandle.getFile();
-            const text = await file.text();
-            locations = parseLocations(text);
-            document.getElementById('locDot').classList.add('ok');
-            document.getElementById('locStatus').textContent = `${locations.length} nodes`;
-            rebuildAll();
+        function readLocFile() {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                locations = parseLocations(ev.target.result);
+                document.getElementById('locDot').classList.add('ok');
+                document.getElementById('locStatus').textContent = locations.length + ' nodes';
+                rebuildAll();
+            };
+            reader.readAsText(locFile);
         }
 
-        async function readRoads() {
-            const file = await roadHandle.getFile();
-            const text = await file.text();
-            roads = parseRoads(text);
-            document.getElementById('roadDot').classList.add('ok');
-            document.getElementById('roadStatus').textContent = `${roads.length} edges`;
-            rebuildAll();
+        function readRoadFile() {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                roads = parseRoads(ev.target.result);
+                document.getElementById('roadDot').classList.add('ok');
+                document.getElementById('roadStatus').textContent = roads.length + ' edges';
+                rebuildAll();
+            };
+            reader.readAsText(roadFile);
         }
 
-        async function refreshAll() {
-            if (locHandle) await readLocations();
-            if (roadHandle) await readRoads();
-            if (!locHandle && !roadHandle) alert('No files loaded yet. Use the Load buttons first.');
+        // Reload both from the same File objects (after C++ updates the files,
+        // user picks them once more — or uses the Reload Both button which re-reads
+        // the already-selected files without re-picking)
+        function reloadBoth() {
+            if (!locFile && !roadFile) {
+                alert('No files selected yet. Use the green/yellow buttons to pick files first.');
+                return;
+            }
+            if (locFile) readLocFile();
+            if (roadFile) readRoadFile();
         }
 
         // ─────────────────────────────────────────────
@@ -931,8 +925,8 @@
             return text.trim().split('\n')
                 .filter(l => l.trim())
                 .map(line => {
-                    const p = line.split('|');
-                    return { id: parseInt(p[0]), name: p[1].trim(), x: parseFloat(p[2]), y: parseFloat(p[3]) };
+                    const p = line.trim().split('|');
+                    return { id: parseInt(p[0]), name: p[1] ? p[1].trim() : '', x: parseFloat(p[2]), y: parseFloat(p[3]) };
                 })
                 .filter(l => !isNaN(l.id));
         }
@@ -941,14 +935,14 @@
             return text.trim().split('\n')
                 .filter(l => l.trim())
                 .map(line => {
-                    const p = line.split('|');
+                    const p = line.trim().split('|');
                     return { from: parseInt(p[0]), to: parseInt(p[1]), distance: parseFloat(p[2]), weight: parseInt(p[3]) };
                 })
                 .filter(r => !isNaN(r.from));
         }
 
         // ─────────────────────────────────────────────
-        // REBUILD AFTER LOAD
+        // REBUILD
         // ─────────────────────────────────────────────
         function rebuildAll() {
             highlightPath = [];
@@ -960,7 +954,7 @@
             draw();
             document.getElementById('emptyOverlay').classList.add('hidden');
             document.getElementById('algoResult').innerHTML = '<span style="color:var(--dim)">Select source and destination, then run an algorithm.</span>';
-            document.getElementById('nodeDetail').innerHTML = `<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>`;
+            document.getElementById('nodeDetail').innerHTML = '<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>';
         }
 
         function updateStatus() {
@@ -983,19 +977,21 @@
 
         function buildRoadsTable() {
             const tbody = document.getElementById('roadsTableBody');
-            if (!roads.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">No roads loaded</td></tr>'; return; }
+            if (!roads.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">No roads loaded</td></tr>';
+                return;
+            }
             tbody.innerHTML = roads.map((r, i) => {
-                const fromName = locName(r.from), toName = locName(r.to);
                 const neg = r.weight < 0;
                 return `<tr>
-      <td style="color:var(--dim)">${i}</td>
-      <td class="r-from">${fromName}</td>
-      <td class="r-to">${toName}</td>
-      <td class="r-dist">${r.distance.toFixed(2)}</td>
-      <td class="r-wt${neg ? ' neg' : ''}">
-        ${r.weight}${neg ? '<span class="r-neg-badge">express</span>' : ''}
-      </td>
-    </tr>`;
+                    <td style="color:var(--dim)">${i}</td>
+                    <td class="r-from">${locName(r.from)}</td>
+                    <td class="r-to">${locName(r.to)}</td>
+                    <td class="r-dist">${r.distance.toFixed(2)}</td>
+                    <td class="r-wt${neg ? ' neg' : ''}">
+                        ${r.weight}${neg ? '<span class="r-neg-badge">express</span>' : ''}
+                    </td>
+                </tr>`;
             }).join('');
         }
 
@@ -1005,18 +1001,18 @@
             const minW = roads.length ? Math.min(...roads.map(r => r.weight)) : '—';
             const maxW = roads.length ? Math.max(...roads.map(r => r.weight)) : '—';
             document.getElementById('graphStats').innerHTML = `
-    <div style="color:var(--dim)">Nodes: <span style="color:var(--cyan)">${locations.length}</span></div>
-    <div style="color:var(--dim)">Edges: <span style="color:var(--cyan)">${roads.length}</span></div>
-    <div style="color:var(--dim)">Express lanes: <span style="color:var(--green)">${neg}</span></div>
-    <div style="color:var(--dim)">Avg distance: <span style="color:var(--cyan)">${avgDist} km</span></div>
-    <div style="color:var(--dim)">Weight range: <span style="color:var(--yellow)">${minW} → ${maxW}</span></div>
-    <div style="color:var(--dim)">Density: <span style="color:var(--cyan)">${locations.length ? (roads.length / (locations.length * (locations.length - 1) / 2) * 100).toFixed(1) + '%' : '—'}</span></div>
-  `;
+                <div>Nodes: <span style="color:var(--cyan)">${locations.length}</span></div>
+                <div>Edges: <span style="color:var(--cyan)">${roads.length}</span></div>
+                <div>Express lanes: <span style="color:var(--green)">${neg}</span></div>
+                <div>Avg distance: <span style="color:var(--cyan)">${avgDist} km</span></div>
+                <div>Weight range: <span style="color:var(--yellow)">${minW} → ${maxW}</span></div>
+                <div>Density: <span style="color:var(--cyan)">${locations.length ? (roads.length / (locations.length * (locations.length - 1) / 2) * 100).toFixed(1) + '%' : '—'}</span></div>
+            `;
         }
 
         function locName(id) {
             const l = locations.find(x => x.id === id);
-            return l ? l.name : `#${id}`;
+            return l ? l.name : '#' + id;
         }
 
         // ─────────────────────────────────────────────
@@ -1026,8 +1022,7 @@
 
         function computeScale() {
             if (!locations.length) return;
-            const W = canvas.width, H = canvas.height;
-            const PAD = 64;
+            const W = canvas.width, H = canvas.height, PAD = 64;
             const xs = locations.map(l => l.x), ys = locations.map(l => l.y);
             const minX = Math.min(...xs), maxX = Math.max(...xs);
             const minY = Math.min(...ys), maxY = Math.max(...ys);
@@ -1043,11 +1038,10 @@
         function draw() {
             const W = canvas.width, H = canvas.height;
             ctx.clearRect(0, 0, W, H);
-
             if (!locations.length) return;
             computeScale();
 
-            // Draw roads
+            // Roads
             roads.forEach(r => {
                 const la = locations.find(x => x.id === r.from);
                 const lb = locations.find(x => x.id === r.to);
@@ -1060,86 +1054,57 @@
                         ((highlightPath[i] === r.from && highlightPath[i + 1] === r.to) ||
                             (highlightPath[i] === r.to && highlightPath[i + 1] === r.from)));
 
-                ctx.beginPath();
-                ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
                 if (inPath) {
-                    ctx.strokeStyle = '#ffd600';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([]);
+                    ctx.strokeStyle = '#ffd600'; ctx.lineWidth = 3; ctx.setLineDash([]);
                 } else if (r.weight < 0) {
-                    ctx.strokeStyle = 'rgba(0,255,136,0.55)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([6, 4]);
+                    ctx.strokeStyle = 'rgba(0,255,136,0.55)'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
                 } else {
-                    ctx.strokeStyle = 'rgba(0,229,255,0.18)';
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([4, 5]);
+                    ctx.strokeStyle = 'rgba(0,229,255,0.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 5]);
                 }
-                ctx.stroke();
-                ctx.setLineDash([]);
+                ctx.stroke(); ctx.setLineDash([]);
 
-                // Label on road midpoint
                 const mx = (ax + bx) / 2, my = (ay + by) / 2;
-                ctx.font = '9px Share Tech Mono';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
+                ctx.font = '9px Share Tech Mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 const distLabel = r.distance.toFixed(1) + 'km';
-                const wtLabel = r.weight < 0 ? `w:${r.weight}` : '';
-
                 if (inPath) {
-                    ctx.fillStyle = 'rgba(6,10,15,0.85)';
-                    ctx.fillRect(mx - 22, my - 9, 44, 18);
-                    ctx.fillStyle = '#ffd600';
-                    ctx.fillText(distLabel, mx, my);
+                    ctx.fillStyle = 'rgba(6,10,15,0.85)'; ctx.fillRect(mx - 22, my - 9, 44, 18);
+                    ctx.fillStyle = '#ffd600'; ctx.fillText(distLabel, mx, my);
                 } else if (r.weight < 0) {
-                    ctx.fillStyle = 'rgba(6,10,15,0.8)';
-                    ctx.fillRect(mx - 22, my - 10, 44, 20);
-                    ctx.fillStyle = 'rgba(0,255,136,0.7)';
-                    ctx.fillText(distLabel, mx, my - 3);
-                    ctx.fillStyle = 'rgba(0,255,136,0.5)';
-                    ctx.fillText(wtLabel, mx, my + 6);
+                    ctx.fillStyle = 'rgba(6,10,15,0.8)'; ctx.fillRect(mx - 22, my - 10, 44, 20);
+                    ctx.fillStyle = 'rgba(0,255,136,0.7)'; ctx.fillText(distLabel, mx, my - 3);
+                    ctx.fillStyle = 'rgba(0,255,136,0.5)'; ctx.fillText('w:' + r.weight, mx, my + 6);
                 } else {
-                    ctx.fillStyle = 'rgba(0,229,255,0.3)';
-                    ctx.fillText(distLabel, mx, my);
+                    ctx.fillStyle = 'rgba(0,229,255,0.3)'; ctx.fillText(distLabel, mx, my);
                 }
             });
 
-            // Draw nodes
+            // Nodes
             locations.forEach(loc => {
                 const [cx, cy] = toCanvas(loc.x, loc.y);
                 const isSelected = selectedNode && selectedNode.id === loc.id;
                 const inPath = highlightPath.includes(loc.id);
                 const R = 18;
 
-                // glow
                 if (isSelected || inPath) {
                     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 2.5);
                     const gc = isSelected ? 'rgba(0,229,255,' : 'rgba(255,214,0,';
-                    glow.addColorStop(0, gc + '0.2)');
-                    glow.addColorStop(1, gc + '0)');
+                    glow.addColorStop(0, gc + '0.2)'); glow.addColorStop(1, gc + '0)');
                     ctx.beginPath(); ctx.arc(cx, cy, R * 2.5, 0, Math.PI * 2);
                     ctx.fillStyle = glow; ctx.fill();
                 }
 
-                // circle fill
                 ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
                 ctx.fillStyle = isSelected ? 'rgba(0,229,255,0.2)' : inPath ? 'rgba(255,214,0,0.15)' : '#0e1820';
                 ctx.fill();
-
-                // circle border
                 ctx.strokeStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(0,229,255,0.4)';
                 ctx.lineWidth = isSelected ? 2.5 : inPath ? 2 : 1.5;
                 ctx.stroke();
 
-                // id text
-                ctx.font = `bold 11px Share Tech Mono`;
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.font = 'bold 11px Share Tech Mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(0,229,255,0.8)';
                 ctx.fillText(loc.id, cx, cy);
 
-                // name label below
                 ctx.font = '10px Rajdhani';
                 ctx.fillStyle = isSelected ? '#00e5ff' : inPath ? '#ffd600' : 'rgba(184,207,232,0.6)';
                 ctx.fillText(loc.name, cx, cy + R + 10);
@@ -1152,20 +1117,17 @@
         canvas.addEventListener('click', e => {
             if (!locations.length) return;
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
-            const mx = (e.clientX - rect.left) * scaleX;
-            const my = (e.clientY - rect.top) * scaleY;
-
+            const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * sx, my = (e.clientY - rect.top) * sy;
             let hit = null, best = Infinity;
             locations.forEach(loc => {
                 const [cx, cy] = toCanvas(loc.x, loc.y);
                 const d = Math.hypot(mx - cx, my - cy);
                 if (d < 24 && d < best) { best = d; hit = loc; }
             });
-
             selectedNode = hit;
             if (hit) showNodeDetail(hit);
-            else document.getElementById('nodeDetail').innerHTML = `<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>`;
+            else document.getElementById('nodeDetail').innerHTML = '<div class="placeholder"><div class="ph-icon">📍</div>Click any node on the map.</div>';
             draw();
         });
 
@@ -1173,25 +1135,20 @@
         canvas.addEventListener('mousemove', e => {
             if (!locations.length) { tooltip.style.display = 'none'; return; }
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
-            const mx = (e.clientX - rect.left) * scaleX;
-            const my = (e.clientY - rect.top) * scaleY;
-
+            const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * sx, my = (e.clientY - rect.top) * sy;
             let hit = null, best = Infinity;
             locations.forEach(loc => {
                 const [cx, cy] = toCanvas(loc.x, loc.y);
                 const d = Math.hypot(mx - cx, my - cy);
                 if (d < 24 && d < best) { best = d; hit = loc; }
             });
-
             if (hit) {
                 const conns = roads.filter(r => r.from === hit.id || r.to === hit.id);
                 tooltip.style.display = 'block';
                 tooltip.style.left = (e.clientX + 14) + 'px';
                 tooltip.style.top = (e.clientY - 10) + 'px';
-                tooltip.innerHTML = `<b style="color:#00e5ff">${hit.name}</b><br>
-      ID: ${hit.id} | x: ${hit.x} y: ${hit.y}<br>
-      Connections: ${conns.length}`;
+                tooltip.innerHTML = `<b style="color:#00e5ff">${hit.name}</b><br>ID: ${hit.id} | x: ${hit.x} y: ${hit.y}<br>Connections: ${conns.length}`;
                 canvas.style.cursor = 'pointer';
             } else {
                 tooltip.style.display = 'none';
@@ -1206,29 +1163,26 @@
                 const otherId = r.from === loc.id ? r.to : r.from;
                 const neg = r.weight < 0;
                 return `<div class="conn-item">
-      <span class="conn-dest">${locName(otherId)}</span>
-      <span class="conn-meta">
-        <span class="conn-dist">${r.distance.toFixed(2)}km</span>
-        <span class="conn-wt${neg ? ' neg' : ''}">w:${r.weight}${neg ? ' ★' : ''}</span>
-      </span>
-    </div>`;
+                    <span class="conn-dest">${locName(otherId)}</span>
+                    <span class="conn-meta">
+                        <span class="conn-dist">${r.distance.toFixed(2)}km</span>
+                        <span class="conn-wt${neg ? ' neg' : ''}">w:${r.weight}${neg ? ' ★' : ''}</span>
+                    </span>
+                </div>`;
             }).join('');
-
             document.getElementById('nodeDetail').innerHTML = `
-    <div class="info-body">
-      <div class="nd-name">${loc.name}</div>
-      <div class="nd-id">ID #${loc.id}</div>
-      <div class="nd-coord">x: ${loc.x}  y: ${loc.y}</div>
-      <div class="nd-connections">Connections (${conns.length})</div>
-      <div class="conn-list">${connHTML || '<div style="color:var(--dim);font-size:12px">No connections</div>'}</div>
-    </div>`;
+            <div class="info-body">
+                <div class="nd-name">${loc.name}</div>
+                <div class="nd-id">ID #${loc.id}</div>
+                <div class="nd-coord">x: ${loc.x}  y: ${loc.y}</div>
+                <div class="nd-connections">Connections (${conns.length})</div>
+                <div class="conn-list">${connHTML || '<div style="color:var(--dim);font-size:12px">No connections</div>'}</div>
+            </div>`;
         }
 
         // ─────────────────────────────────────────────
-        // ALGORITHMS (JavaScript implementation)
+        // ALGORITHMS
         // ─────────────────────────────────────────────
-
-        // Build adjacency for Dijkstra (distance-based)
         function buildAdjDist() {
             const adj = {};
             locations.forEach(l => adj[l.id] = []);
@@ -1239,7 +1193,6 @@
             return adj;
         }
 
-        // Build adjacency for Bellman-Ford (weight-based, edge list)
         function buildEdgeList() {
             const edges = [];
             roads.forEach(r => {
@@ -1249,50 +1202,37 @@
             return edges;
         }
 
-        function dijkstra(srcId, dstId) {
+        function dijkstra(srcId) {
             const adj = buildAdjDist();
-            const INF = 1e18;
-            const dist = {}, prev = {};
+            const INF = 1e18, dist = {}, prev = {};
             locations.forEach(l => { dist[l.id] = INF; prev[l.id] = -1; });
             dist[srcId] = 0;
-
-            // simple priority queue using array
             const pq = [{ node: srcId, cost: 0 }];
             while (pq.length) {
                 pq.sort((a, b) => a.cost - b.cost);
                 const { node: u, cost: d } = pq.shift();
                 if (d > dist[u]) continue;
                 for (const { node: v, cost: w } of (adj[u] || [])) {
-                    if (dist[u] + w < dist[v]) {
-                        dist[v] = dist[u] + w;
-                        prev[v] = u;
-                        pq.push({ node: v, cost: dist[v] });
-                    }
+                    if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; prev[v] = u; pq.push({ node: v, cost: dist[v] }); }
                 }
             }
             return { dist, prev };
         }
 
-        function bellmanFord(srcId, dstId) {
+        function bellmanFord(srcId) {
             const edges = buildEdgeList();
-            const INF = 1e18;
-            const dist = {}, prev = {};
+            const INF = 1e18, dist = {}, prev = {};
             locations.forEach(l => { dist[l.id] = INF; prev[l.id] = -1; });
             dist[srcId] = 0;
-
             for (let i = 0; i < locations.length - 1; i++) {
                 let updated = false;
                 for (const e of edges) {
                     if (dist[e.from] < INF && dist[e.from] + e.cost < dist[e.to]) {
-                        dist[e.to] = dist[e.from] + e.cost;
-                        prev[e.to] = e.from;
-                        updated = true;
+                        dist[e.to] = dist[e.from] + e.cost; prev[e.to] = e.from; updated = true;
                     }
                 }
                 if (!updated) break;
             }
-
-            // negative cycle check
             for (const e of edges) {
                 if (dist[e.from] < INF && dist[e.from] + e.cost < dist[e.to])
                     return { dist, prev, negCycle: true };
@@ -1330,24 +1270,18 @@
             const src = parseInt(document.getElementById('algoSrc').value);
             const dst = parseInt(document.getElementById('algoDst').value);
             if (src === dst) { showAlgoResult('<span class="ar-err">Source and destination must differ.</span>'); return; }
-
-            const { dist, prev } = dijkstra(src, dst);
+            const { dist, prev } = dijkstra(src);
             if (dist[dst] >= 1e17) { showAlgoResult('<span class="ar-err">No path found.</span>'); highlightPath = []; draw(); return; }
-
             const path = reconstructPath(prev, src, dst);
-            const totalDist = sumPathDist(path);
-            const totalWt = sumPathWeight(path);
-            highlightPath = path;
-            draw();
-
+            highlightPath = path; draw();
             const pathStr = path.map(id => locName(id)).join(' → ');
             showAlgoResult(`
-    <span class="ar-algo">▶ DIJKSTRA (shortest by Euclidean distance)</span><br>
-    <span class="ar-path">${pathStr}</span><br>
-    <span class="ar-dist">Total distance : ${totalDist.toFixed(2)} km</span><br>
-    <span class="ar-wt">Traffic weight : ${totalWt}</span><br>
-    <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
-  `);
+                <span class="ar-algo">▶ DIJKSTRA (shortest by distance)</span><br>
+                <span class="ar-path">${pathStr}</span><br>
+                <span class="ar-dist">Total distance : ${sumPathDist(path).toFixed(2)} km</span><br>
+                <span class="ar-wt">Traffic weight : ${sumPathWeight(path)}</span><br>
+                <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
+            `);
         }
 
         function runBellmanFord() {
@@ -1355,33 +1289,26 @@
             const src = parseInt(document.getElementById('algoSrc').value);
             const dst = parseInt(document.getElementById('algoDst').value);
             if (src === dst) { showAlgoResult('<span class="ar-err">Source and destination must differ.</span>'); return; }
-
-            const { dist, prev, negCycle } = bellmanFord(src, dst);
-            if (negCycle) { showAlgoResult('<span class="ar-err">⚠ Negative cycle detected — Bellman-Ford cannot guarantee a result.</span>'); highlightPath = []; draw(); return; }
+            const { dist, prev, negCycle } = bellmanFord(src);
+            if (negCycle) { showAlgoResult('<span class="ar-err">⚠ Negative cycle detected.</span>'); highlightPath = []; draw(); return; }
             if (dist[dst] >= 1e17) { showAlgoResult('<span class="ar-err">No path found.</span>'); highlightPath = []; draw(); return; }
-
             const path = reconstructPath(prev, src, dst);
-            const totalDist = sumPathDist(path);
             const totalWt = sumPathWeight(path);
-            highlightPath = path;
-            draw();
-
+            highlightPath = path; draw();
             const pathStr = path.map(id => locName(id)).join(' → ');
             showAlgoResult(`
-    <span class="ar-algo">▶ BELLMAN-FORD (shortest by traffic weight — negatives OK)</span><br>
-    <span class="ar-path">${pathStr}</span><br>
-    <span class="ar-dist">Total distance : ${totalDist.toFixed(2)} km</span><br>
-    <span class="ar-wt">Total weight   : ${totalWt}${totalWt < 0 ? ' ✦ used express lane(s)' : ''}</span><br>
-    <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
-  `);
+                <span class="ar-algo">▶ BELLMAN-FORD (shortest by weight — negatives OK)</span><br>
+                <span class="ar-path">${pathStr}</span><br>
+                <span class="ar-dist">Total distance : ${sumPathDist(path).toFixed(2)} km</span><br>
+                <span class="ar-wt">Total weight   : ${totalWt}${totalWt < 0 ? ' ✦ used express lane(s)' : ''}</span><br>
+                <span style="color:var(--dim)">Hops: ${path.length - 1}</span>
+            `);
         }
 
-        function showAlgoResult(html) {
-            document.getElementById('algoResult').innerHTML = html;
-        }
+        function showAlgoResult(html) { document.getElementById('algoResult').innerHTML = html; }
 
         // ─────────────────────────────────────────────
-        // CANVAS RESIZE
+        // RESIZE
         // ─────────────────────────────────────────────
         function resizeCanvas() {
             const panel = canvas.parentElement;
@@ -1391,10 +1318,6 @@
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-
-        // Initial empty draw
-        ctx.fillStyle = 'rgba(0,229,255,0.03)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 
